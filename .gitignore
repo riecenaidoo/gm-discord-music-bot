@@ -1,0 +1,9 @@
+
+# Virutal Environment
+venv
+
+# IDE Configs
+.vscode
+
+# Token Data 
+config
