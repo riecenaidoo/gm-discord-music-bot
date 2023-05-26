@@ -46,7 +46,7 @@ class MyClient(discord.Client):
         print(f'Message from {message.author}: {message.content}')
 
 
-if __name__ == "__main__":
+def run():
     intents = discord.Intents.default()
     intents.message_content = True
 
@@ -59,4 +59,5 @@ if __name__ == "__main__":
     locally.
     """
     token = get_token(os.path.join("config", "token.txt"))
-    client.run(token)
+    if token:
+        client.run(token)
