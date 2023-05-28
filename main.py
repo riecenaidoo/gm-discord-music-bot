@@ -3,7 +3,7 @@ Script Executions
 """
 import os
 
-from examples import message_listener
+from examples import message_listener, channel_retriever
 
 
 # Helper Methods
@@ -28,4 +28,6 @@ if __name__ == "__main__":
     """
     token = get_token(os.path.join("config", "token.txt"))
     if token:
-        message_listener.run(token)
+        raise RuntimeError("[INFO] Uncomment the script you're testing!")  # Comment Out
+        # message_listener.run(token)
+        # channel_retriever.run(token)
