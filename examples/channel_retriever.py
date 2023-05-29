@@ -16,6 +16,7 @@ class MyClient(discord.Client):
         self.text_channels = []
         self.voice_channels = []
 
+    # Overrides discord.Client.on_ready - an event that can be listened for.
     async def on_ready(self):
         print(f'Logged on as {self.user}!')
         self.retrieve_channels()
