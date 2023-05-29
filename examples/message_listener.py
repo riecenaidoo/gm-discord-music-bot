@@ -9,6 +9,8 @@ import discord
 
 # This example requires the 'message_content' intent.
 class MyClient(discord.Client):
+
+    # Overrides discord.Client.on_ready - an event that can be listened for.
     async def on_ready(self):
         print(f'Logged on as {self.user}!')
 
@@ -20,6 +22,7 @@ class MyClient(discord.Client):
     [Source](https://www.velotio.com/engineering-blog/async-features-in-python#:~:text=Async%20programming%20in%20Python,waiting%20for%20any%20of%20them.)
     """
 
+    # Overrides discord.Client.on_message - an event that can be listened for.
     @staticmethod
     async def on_message(message):
         print(f'Message from {message.author}: {message.content}')

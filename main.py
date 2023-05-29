@@ -3,7 +3,7 @@ Script Executions
 """
 import os
 
-from examples import message_listener, channel_retriever
+from examples import message_listener, channel_retriever, selective_message_listener
 
 
 # Helper Methods
@@ -31,3 +31,4 @@ if __name__ == "__main__":
         raise RuntimeError("[INFO] Uncomment the script you're testing!")  # Comment Out
         # message_listener.run(token)
         # channel_retriever.run(token)
+        # selective_message_listener.run(token)
