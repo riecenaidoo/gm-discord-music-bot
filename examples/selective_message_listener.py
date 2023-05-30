@@ -10,7 +10,7 @@ import discord
 from discord import Intents
 
 
-class MyClient(discord.Client):
+class SelectiveMessageListenerClient(discord.Client):
     def __init__(self, *, intents: Intents, **options: Any):
         super().__init__(intents=intents, **options)
         self.text_channels = []
@@ -76,5 +76,5 @@ def run(token):
     intents = discord.Intents.default()
     intents.message_content = True
 
-    client = MyClient(intents=intents)
+    client = SelectiveMessageListenerClient(intents=intents)
     client.run(token)

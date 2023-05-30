@@ -24,3 +24,11 @@ _[discord.py/docs/basic-concepts](https://discordpy.readthedocs.io/en/latest/int
 ### discord.py
 
     pip install discord.py
+
+### PyNaCl
+
+To run the `voice_joiner.py` script, which connects to a voice channel in the Discord,
+you'll need to install `PyNaCl`, a library for network connection
+encryption. - [Read More](https://pypi.org/project/PyNaCl/)
+
+    pip install PyNaCl
