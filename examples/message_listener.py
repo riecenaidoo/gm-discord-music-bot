@@ -8,7 +8,7 @@ import discord
 
 
 # This example requires the 'message_content' intent.
-class MyClient(discord.Client):
+class MessageListenerClient(discord.Client):
 
     # Overrides discord.Client.on_ready - an event that can be listened for.
     async def on_ready(self):
@@ -32,5 +32,5 @@ def run(token):
     intents = discord.Intents.default()
     intents.message_content = True
 
-    client = MyClient(intents=intents)
+    client = MessageListenerClient(intents=intents)
     client.run(token)

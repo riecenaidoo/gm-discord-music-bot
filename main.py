@@ -3,7 +3,8 @@ Script Executions
 """
 import os
 
-from examples import message_listener, channel_retriever, selective_message_listener
+from examples import (message_listener, channel_retriever, selective_message_listener,
+                      voice_joiner)
 
 
 # Helper Methods
@@ -32,3 +33,4 @@ if __name__ == "__main__":
         # message_listener.run(token)
         # channel_retriever.run(token)
         # selective_message_listener.run(token)
+        # voice_joiner.run(token)
