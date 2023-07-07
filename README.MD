@@ -32,3 +32,12 @@ you'll need to install `PyNaCl`, a library for network connection
 encryption. - [Read More](https://pypi.org/project/PyNaCl/)
 
     pip install PyNaCl
+
+### ffmpeg
+
+To run the `voice_emitter.py` script, which can emit audio in a voice channel
+the bot has joined, you'll need to have `ffmpeg` installed on your local machine.
+FFMPEG is an open source suite of libraries for handling various types
+of multimedia streaming. - [Read More](https://ffmpeg.org/)
+
+    sudo apt install ffmpeg

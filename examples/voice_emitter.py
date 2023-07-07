@@ -131,16 +131,14 @@ class VoiceJoinerClient(discord.Client):
         await self.emit_sound()
 
     async def emit_sound(self):
-        """Emits a sound in the joined channel.
+        """Emits a sound in the joined channel."""
 
-        pip install git+https://github.com/ytdl-org/youtube-dl.git@master#egg=youtube_dl
-        """
-        # url = input("URL > ")
-        url = "https://www.youtube.com/watch?v=QaSHaHJzmfk"
+        path = input("Sound Path (.mp3) > ")
+        while not os.path.isfile(path):
+            print("Please enter a path to an existing .mp3 audio file to stream into the Discord channel.")
+            path = input("Sound Path (.mp3) > ")
 
-        async with self.txt_channel.typing():
-            player = await YTDLSource.from_url(url, loop=self.voice_client.loop)
-            self.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
+        self.voice_client.play(discord.FFmpegPCMAudio(path))
 
 
 def run(token):
