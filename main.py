@@ -27,14 +27,15 @@ if __name__ == "__main__":
     does not get pushed to the repo, and is only saved
     locally.
     """
+
     token = get_token(os.path.join("config", "token.txt"))
     if token:
-        # raise RuntimeError("[INFO] Uncomment the script you're testing!")  # Comment Out
+        raise RuntimeError("[INFO] Uncomment the script you're testing!")  # Comment Out
         # message_listener.run(token)
         # channel_retriever.run(token)
         # selective_message_listener.run(token)
         # voice_joiner.run(token)
         # voice_emitter.run(token)
-        voice_stream_youtube.run(token)
+        # voice_stream_youtube.run(token)
     else:
         raise RuntimeError("[INFO] You need a Discord bot token saved under '/config/token.txt'.")

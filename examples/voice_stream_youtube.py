@@ -124,7 +124,6 @@ class VoiceJoinerClient(discord.Client):
         created during the connection process, to the `bot_in_voice_channel` field for future reference.
 
         :param joining_channel: The discord.VoiceChannel to have the bot connect to.
-        :return:
         """
 
         self.voice_client = await discord.VoiceChannel.connect(joining_channel)
@@ -144,18 +143,30 @@ class VoiceJoinerClient(discord.Client):
 
         """
 
-        url = None
-        format_match = False
-        while not format_match:
+        while True:  # I wish was a do-while loop
             url = input("YouTube Video > ")
-            pattern = re.compile("(v=[_0-9A-Za-z]{11})")
-            format_match = re.search(pattern, url)
-            if not format_match:
-                print("Please enter a YouTube Video URL.")
+            if youtube_url_match(url):
+                break
+            print("URL format appears to be incorrect.\nPlease enter a valid YouTube Video URL.")
 
         async with self.txt_channel.typing():
             player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
             self.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
+
+
+def youtube_url_match(url: str) -> bool:
+    """Regex pattern matching a string to check if it contains
+    the video id section that all YouTube video links appear to end with
+    i.e `v=...`.
+
+    This would be the video id sent to the YouTube API.
+
+    :param url: str containing the URL to verify
+    :return: true if the URL could be a YouTube video link
+    """
+
+    pattern = re.compile("(v=[_0-9A-Za-z]{11})")
+    return re.search(pattern, url) is not None
 
 
 def run(token):
