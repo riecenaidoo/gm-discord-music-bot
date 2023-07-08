@@ -43,7 +43,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        data = await loop.run_in_executor(executor=None, func=lambda: ytdl.extract_info(url, download=not stream))
 
         if 'entries' in data:
             # take first item from a playlist
@@ -147,7 +147,7 @@ class VoiceJoinerClient(discord.Client):
         url = "https://www.youtube.com/watch?v=QaSHaHJzmfk"  # Random video for testing
 
         async with self.txt_channel.typing():
-            player = await YTDLSource.from_url(url, loop=self.voice_client.loop)
+            player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
             self.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
 
 
