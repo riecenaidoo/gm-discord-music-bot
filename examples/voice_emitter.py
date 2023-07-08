@@ -30,10 +30,7 @@ class VoiceJoinerClient(discord.Client):
     # Helper Methods
     def retrieve_voice_channels(self):
         """Retrieves all Voice channels in the guild that are visible
-        to the bot and stores them in the class.
-
-        :return:
-        """
+        to the bot and stores them in the class."""
 
         for guild in self.guilds:
             for index, channel in enumerate(guild.voice_channels):
@@ -77,7 +74,6 @@ class VoiceJoinerClient(discord.Client):
         created during the connection process, to the `bot_in_voice_channel` field for future reference.
 
         :param joining_channel: The discord.VoiceChannel to have the bot connect to.
-        :return:
         """
 
         self.voice_client = await discord.VoiceChannel.connect(joining_channel)

@@ -41,3 +41,17 @@ FFMPEG is an open source suite of libraries for handling various types
 of multimedia streaming. - [Read More](https://ffmpeg.org/)
 
     sudo apt install ffmpeg
+
+### youtube-dl
+
+To run the `voice_stream_youtube.py` script, which can stream audio from
+a YouTube video into a voice channel the bot has joined, you'll need to have
+`youtube-dl` installed. YouTube-DL is a free, open source command line program
+to download videos from YouTube.com. - [Read More](https://github.com/ytdl-org/youtube-dl)
+
+    pip install youtube_dl
+
+## Contributors
+
+- riecenaidoo
+- SuperMagikarp
