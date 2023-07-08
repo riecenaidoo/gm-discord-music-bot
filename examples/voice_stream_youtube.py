@@ -1,4 +1,4 @@
-"""Stream in a specific YouTube video into a voice channel in the Discord."""
+"""Stream audio from a specific YouTube video into a voice channel in the Discord."""
 import asyncio
 import re
 
