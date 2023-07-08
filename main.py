@@ -3,8 +3,9 @@ Script Executions
 """
 import os
 
+# noinspection PyUnresolvedReferences
 from examples import (message_listener, channel_retriever, selective_message_listener,
-                      voice_joiner, voice_emitter, voice_stream_youtube)
+                      voice_joiner, voice_emitter, voice_stream_youtube, voice_stream_yt_miniplayer)
 
 
 # Helper Methods
@@ -37,5 +38,6 @@ if __name__ == "__main__":
         # voice_joiner.run(token)
         # voice_emitter.run(token)
         # voice_stream_youtube.run(token)
+        # voice_stream_yt_miniplayer.run(token)
     else:
         raise RuntimeError("[INFO] You need a Discord bot token saved under '/config/token.txt'.")
