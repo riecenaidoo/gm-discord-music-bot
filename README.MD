@@ -51,6 +51,15 @@ to download videos from YouTube.com. - [Read More](https://github.com/ytdl-org/y
 
     pip install youtube_dl
 
+### kivy
+
+To run the `voice_streaming_controls.py` script, which can pause/resume the audio
+that is being streamed, you'll need to have `kivy` installed. Kivy is a free and
+open source Python framework for developing multitouch
+application software. - [Read More](https://kivy.org/)
+
+    pip install kivy
+
 ## Contributors
 
 - riecenaidoo
