@@ -1,5 +1,6 @@
 """Stream in a specific YouTube video into a voice channel in the Discord."""
 import asyncio
+import re
 
 from typing import Any
 
@@ -143,8 +144,14 @@ class VoiceJoinerClient(discord.Client):
 
         """
 
-        # url = input("URL > ")
-        url = "https://www.youtube.com/watch?v=QaSHaHJzmfk"  # Random video for testing
+        url = None
+        format_match = False
+        while not format_match:
+            url = input("YouTube Video > ")
+            pattern = re.compile("(v=[_0-9A-Za-z]{11})")
+            format_match = re.search(pattern, url)
+            if not format_match:
+                print("Please enter a YouTube Video URL.")
 
         async with self.txt_channel.typing():
             player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
