@@ -1,4 +1,4 @@
-"""Stream audio from a specific YouTube video into a voice channel in the Discord."""
+"""Control the streamed audio of in the voice channel on the Discord."""
 
 import os
 
@@ -26,6 +26,7 @@ from kivy.uix.gridlayout import GridLayout
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
 
+# noinspection SpellCheckingInspection
 ytdl_format_options = {
     'format': 'bestaudio/best',
     'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
@@ -82,24 +83,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         filename = data['url'] if stream else ytdl.prepare_filename(data)
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
-
-
-class Controller(App):
-    """"""
-
-    def __init__(self):
-        super().__init__()
-
-        self.pause_button = Button(text="[Pause]")
-        self.resume_button = Button(text="[Resume]")
-
-    def build(self):
-        grid = GridLayout(cols=2)
-
-        grid.add_widget(self.pause_button)
-        grid.add_widget(self.resume_button)
-
-        return grid
 
 
 class VoiceJoinerClient(discord.Client):
@@ -175,20 +158,12 @@ class VoiceJoinerClient(discord.Client):
         """
 
         self.voice_client = await discord.VoiceChannel.connect(joining_channel)
-        await self.stream_youtube()
+        await self.stream_youtube_miniplayer()
 
-    async def stream_youtube(self):
-        """Stream the audio of a YouTube video in the joined channel.
-
-        Notes: This was a while ago, and I need to verify if it's
-        still the case, but there was a fatal bug with the latest
-        version of youtube-dl via pip install youtube-dl. It was
-        fixed in their GitHub, but not yet pushed to the package?
-        TODO: Read up on this and verify.
-
-            Pip install latest version (with fixes):
-                pip install git+https://github.com/ytdl-org/youtube-dl.git@master#egg=youtube_dl
-
+    async def stream_youtube_miniplayer(self):
+        """Launch a Miniplayer that can
+        control the streamed audio of a YouTube video in the joined
+        voice channel.
         """
 
         while True:  # I wish was a do-while loop
@@ -200,22 +175,26 @@ class VoiceJoinerClient(discord.Client):
         async with self.txt_channel.typing():
             player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
             self.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
+            parent = self
 
-        miniplayer = Controller()
-        miniplayer.pause_button.bind(on_release=lambda x: self.do_pause())
-        miniplayer.resume_button.bind(on_release=lambda x: self.do_resume())
+            class Miniplayer(App):
+                """"""
 
-        miniplayer.run()
+                def build(self):
+                    grid = GridLayout(cols=2)
 
-    async def do_pause(self):
-        """"""
+                    pause_button = Button(text="[Pause]")
+                    resume_button = Button(text="[Resume]")
 
-        self.voice_client.pause()
+                    pause_button.bind(on_release=lambda x: parent.voice_client.pause())
+                    resume_button.bind(on_release=lambda x: parent.voice_client.resume())
 
-    async def do_resume(self):
-        """"""
+                    grid.add_widget(pause_button)
+                    grid.add_widget(resume_button)
 
-        self.voice_client.resume()
+                    return grid
+
+            Miniplayer().run()
 
 
 def run(token):
