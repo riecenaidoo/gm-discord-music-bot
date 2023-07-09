@@ -16,11 +16,11 @@ from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 
-import main
 import bumbles
 
 examples_package = 'bumbles'
-token = main.get_token(os.path.join("config", "token.txt"))
+# token = main.get_token(os.path.join("config", "token.txt"))
+token = "is this the function you're looking for?"
 
 
 class ExampleSelector(App):
@@ -32,8 +32,9 @@ class ExampleSelector(App):
 
         for snippet in snippets:
             button = Button(text=f"{snippet}")
-            func = __import__(f"{examples_package}.{snippet}", fromlist=[f"{examples_package}"])
-            button.bind(on_release=lambda x: func.run(token))
+            func = __import__(f"{examples_package}.{snippet}", fromlist=[f"{examples_package}"]).run
+            func(token)  # Correct function
+            button.bind(on_release=lambda x: func(token))  # When clicked, uses wrong func
             grid.add_widget(button)
 
         return grid
