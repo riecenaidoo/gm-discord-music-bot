@@ -30,12 +30,24 @@ class ExampleSelector(App):
         snippets = ([name for _, name, _ in pkgutil.iter_modules([pkg_path])])
         grid = GridLayout(rows=len(snippets))
 
+        directory = dict()
+
         for snippet in snippets:
-            button = Button(text=f"{snippet}")
             func = __import__(f"{examples_package}.{snippet}", fromlist=[f"{examples_package}"]).run
-            func(token)  # Correct function
-            button.bind(on_release=lambda x: func(token))  # When clicked, uses wrong func
-            grid.add_widget(button)
+            directory.update({snippet: func})
+
+        print(directory)
+
+        for snip in directory:
+            print(snip)
+            print(directory.get(snip))
+            grid.add_widget(Button(text=f"{snip}",
+                                   on_release=lambda x: directory.get(snip)(token)))
+
+        # for snippet in snippets:
+        #     func = __import__(f"{examples_package}.{snippet}", fromlist=[f"{examples_package}"]).run
+        #     grid.add_widget(Button(text=f"{snippet}",
+        #                            on_release=lambda x: func(token)))  # Why are these binding to the same thing?
 
         return grid
 
