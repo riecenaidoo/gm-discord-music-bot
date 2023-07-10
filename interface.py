@@ -1,9 +1,11 @@
+"""Dynamically created interface for the main script using
+Kivy."""
+
 import importlib
 import os.path
 import pkgutil
 
 from kivy.app import App
-from kivy.core.window import Window
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 
@@ -18,8 +20,16 @@ of development.
 
 
 class ModuleSelector(App):
+    """Dynamically created gui that enables the user
+    to select a specific module from a package and run
+    the example code snippet inside it."""
 
-    def __init__(self, package, token):
+    def __init__(self, package: str, token: str):
+        """Initialises the selector.
+        :param package: package name containing the modules to select from
+        :param token: the access token to pass to the example code snippet's run method
+        """
+
         super().__init__()
         self.token = token
         self.package = package
@@ -40,8 +50,14 @@ class ModuleSelector(App):
         return grid
 
     def call(self, instance: Button):
+        """Handles the execution of the chosen example
+        code snippet by dynamically importing the module
+        and calling its run method.
+
+        All example code snippets in the package must have a
+        run() method, which would be their entry point.
+        """
+
         module_name = instance.text
         module = importlib.import_module(name=f"{self.package}.{module_name}", package=self.package)
         module.run(self.token)
-        App.stop(self)
-        Window.close()

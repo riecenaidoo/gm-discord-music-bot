@@ -25,6 +25,14 @@ _[discord.py/docs/basic-concepts](https://discordpy.readthedocs.io/en/latest/int
 
     pip install discord.py
 
+### kivy
+
+This project makes use of `kivy` to create graphical user interfaces. Kivy is a free and
+open source Python framework for developing multitouch
+application software. - [Read More](https://kivy.org/)
+
+    pip install kivy
+
 ### PyNaCl
 
 To run the `voice_joiner.py` script, which connects to a voice channel in the Discord,
@@ -51,14 +59,6 @@ to download videos from YouTube.com. - [Read More](https://github.com/ytdl-org/y
 
     pip install youtube_dl
 
-### kivy
-
-To run the `voice_streaming_controls.py` script, which can pause/resume the audio
-that is being streamed, you'll need to have `kivy` installed. Kivy is a free and
-open source Python framework for developing multitouch
-application software. - [Read More](https://kivy.org/)
-
-    pip install kivy
 
 ## Contributors
 
