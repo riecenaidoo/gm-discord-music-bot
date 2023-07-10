@@ -3,6 +3,7 @@ import os.path
 import pkgutil
 
 from kivy.app import App
+from kivy.core.window import Window
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 
@@ -42,3 +43,5 @@ class ModuleSelector(App):
         module_name = instance.text
         module = importlib.import_module(name=f"{self.package}.{module_name}", package=self.package)
         module.run(self.token)
+        App.stop(self)
+        Window.close()

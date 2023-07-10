@@ -3,7 +3,7 @@ Script Executions
 """
 import os
 
-from dynamic_interface import ModuleSelector
+from interface import ModuleSelector
 
 
 # Helper Methods
