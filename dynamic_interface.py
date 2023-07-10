@@ -1,17 +1,4 @@
 import importlib
-import os
-
-import main
-
-"""
-
-Disabling Kivy's console log to declutter console while in testing phase
-of development.
-
-[Read More](https://kivy.org/doc/stable/guide/environment.html)
-"""
-# os.environ['KIVY_NO_CONSOLELOG'] = '1'
-
 import os.path
 import pkgutil
 
@@ -19,8 +6,17 @@ from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 
+"""
+os.environ['KIVY_NO_CONSOLELOG'] = '1'  # Add before Kivy import statements
 
-class ExampleSelector(App):
+Disabling Kivy's console log to declutter console while in testing phase
+of development. 
+
+[Read More](https://kivy.org/doc/stable/guide/environment.html)
+"""
+
+
+class ModuleSelector(App):
 
     def __init__(self, package, token):
         super().__init__()
@@ -46,7 +42,3 @@ class ExampleSelector(App):
         module_name = instance.text
         module = importlib.import_module(name=f"{self.package}.{module_name}", package=self.package)
         module.run(self.token)
-
-
-if __name__ == '__main__':
-    ExampleSelector('bumbles', main.get_token(os.path.join("config", "token.txt"))).run()
