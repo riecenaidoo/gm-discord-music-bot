@@ -1,3 +1,4 @@
+import importlib
 import os
 
 """
@@ -7,7 +8,7 @@ of development.
 
 [Read More](https://kivy.org/doc/stable/guide/environment.html)
 """
-os.environ['KIVY_NO_CONSOLELOG'] = '1'
+# os.environ['KIVY_NO_CONSOLELOG'] = '1'
 
 import os.path
 import pkgutil
@@ -23,6 +24,12 @@ examples_package = 'bumbles'
 token = "is this the function you're looking for?"
 
 
+def call(func_name: str):
+    print(func_name)  # For some reason, we are always receiving foo.
+    func = importlib.import_module(name=f"{examples_package}.{func_name}", package=examples_package)
+    func.run(token)
+
+
 class ExampleSelector(App):
 
     def build(self):
@@ -30,24 +37,15 @@ class ExampleSelector(App):
         snippets = ([name for _, name, _ in pkgutil.iter_modules([pkg_path])])
         grid = GridLayout(rows=len(snippets))
 
-        directory = dict()
+        buttons = set()
+        for snip in snippets:
+            buttons.add(Button(text=f"{snip}"))
 
-        for snippet in snippets:
-            func = __import__(f"{examples_package}.{snippet}", fromlist=[f"{examples_package}"]).run
-            directory.update({snippet: func})
+        for button in buttons:
+            button.bind(on_release=lambda x: call(button.text))
 
-        print(directory)
-
-        for snip in directory:
-            print(snip)
-            print(directory.get(snip))
-            grid.add_widget(Button(text=f"{snip}",
-                                   on_release=lambda x: directory.get(snip)(token)))
-
-        # for snippet in snippets:
-        #     func = __import__(f"{examples_package}.{snippet}", fromlist=[f"{examples_package}"]).run
-        #     grid.add_widget(Button(text=f"{snippet}",
-        #                            on_release=lambda x: func(token)))  # Why are these binding to the same thing?
+        for button in buttons:
+            grid.add_widget(button)
 
         return grid
 
