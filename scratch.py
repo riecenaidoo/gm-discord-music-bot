@@ -1,6 +1,8 @@
 import importlib
 import os
 
+import main
+
 """
 
 Disabling Kivy's console log to declutter console while in testing phase
@@ -17,38 +19,34 @@ from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 
-import bumbles
-
-examples_package = 'bumbles'
-# token = main.get_token(os.path.join("config", "token.txt"))
-token = "is this the function you're looking for?"
-
-
-def call(func_name: str):
-    print(func_name)  # For some reason, we are always receiving foo.
-    func = importlib.import_module(name=f"{examples_package}.{func_name}", package=examples_package)
-    func.run(token)
-
 
 class ExampleSelector(App):
 
+    def __init__(self, package, token):
+        super().__init__()
+        self.token = token
+        self.package = package
+
     def build(self):
-        pkg_path = os.path.dirname(bumbles.__file__)
-        snippets = ([name for _, name, _ in pkgutil.iter_modules([pkg_path])])
-        grid = GridLayout(rows=len(snippets))
+        pkg = importlib.import_module(self.package)
+        pkg_path = os.path.dirname(pkg.__file__)
+        modules = ([name for _, name, _ in pkgutil.iter_modules([pkg_path])])
 
-        buttons = set()
-        for snip in snippets:
-            buttons.add(Button(text=f"{snip}"))
+        grid = GridLayout(rows=len(modules))
 
-        for button in buttons:
-            button.bind(on_release=lambda x: call(button.text))
-
-        for button in buttons:
-            grid.add_widget(button)
+        for module in modules:
+            grid.add_widget(Button(
+                text=f"{module}",
+                on_release=self.call
+            ))
 
         return grid
 
+    def call(self, instance: Button):
+        module_name = instance.text
+        module = importlib.import_module(name=f"{self.package}.{module_name}", package=self.package)
+        module.run(self.token)
+
 
 if __name__ == '__main__':
-    ExampleSelector().run()
+    ExampleSelector('bumbles', main.get_token(os.path.join("config", "token.txt"))).run()
