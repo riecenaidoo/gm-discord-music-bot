@@ -1,0 +1,4 @@
+discord.py
+kivy
+PyNaCl
+youtube_dl
