@@ -1,17 +1,19 @@
-
+VENV = venv
+PYTHON = $(VENV)/bin/python3
+PIP = $(VENV)/bin/pip
 
 .PHONY: run clean
 
 
+run: $(VENV)/bin/activate
+	$(PYTHON) main.py
+
+
 venv/bin/activate: requirements.txt
-	python3 -m venv venv
-	./venv/bin/pip install --no-cache-dir -r requirements.txt
-
-
-run: venv/bin/activate
-	./venv/bin/python main.py
+	$(PYTHON) -m venv $(VENV)
+	$(PIP) install --no-cache-dir -r requirements.txt
 
 
 clean:
 	rm -rf __pycache__
-	rm -rf venv
+	rm -rf $(VENV)
