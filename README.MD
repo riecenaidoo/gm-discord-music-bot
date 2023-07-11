@@ -1,7 +1,8 @@
 # Discord Relay Bot (Experimental)
 
 This project intends to create a service that can relay various
-forms of information from a local program, into a Discord server, via a locally hosted Discord bot.
+forms of information gathered from a client program,
+into a Discord server, via a locally hosted Discord bot.
 
 This project is still in its early stages of development.
 
@@ -13,7 +14,7 @@ This project is still in its early stages of development.
     directory under `config/token.txt`. The token controls access
     to your Bot, so keep it safe.
 - ffmpeg
-  - FFMPEG is an open source suite of libraries for handling various types
+  - FFMPEG is an open-source suite of libraries for handling various types
     of multimedia streaming and is required by example snippets
     streaming audio into Discord voice channels. - [Read More](https://ffmpeg.org/)
   - `sudo apt install ffmpeg` or `sudo apk add ffmpeg`
