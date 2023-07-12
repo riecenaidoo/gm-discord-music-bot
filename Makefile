@@ -1,12 +1,12 @@
 VENV = venv
 PYTHON = $(VENV)/bin/python3
 PIP = $(VENV)/bin/pip
-TOKEN = config/token.txt # Location of the Discord Bot Token
+
 
 .PHONY: run clean
 
 
-run: $(VENV)/bin/activate $(TOKEN)
+run: $(VENV)/bin/activate
 	$(PYTHON) main.py
 
 
