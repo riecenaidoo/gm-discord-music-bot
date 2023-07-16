@@ -31,6 +31,8 @@ ffmpeg_options = {
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
+url = "https://www.youtube.com/watch?v=tiDy3cuscFY"  # TODO Remove
+
 
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
@@ -127,20 +129,16 @@ class VoiceJoinerClient(discord.Client):
         """
 
         self.voice_client = await discord.VoiceChannel.connect(joining_channel)
-
-        urls = ["https://www.youtube.com/watch?v=tiDy3cuscFY",
-                "https://www.youtube.com/watch?v=tiDy3cuscFY",
-                "https://www.youtube.com/watch?v=tiDy3cuscFY"]
-
-        for url in urls:
-            async with self.txt_channel.typing():
-                await self.stream_youtube(url)
+        await self.stream_youtube(url)
 
     async def stream_youtube(self, url: str):
         """Stream the audio of a YouTube video in the joined channel."""
 
-        player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
-        self.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
+        async with self.txt_channel.typing():
+            player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
+            self.voice_client.play(player,
+                                   after=lambda e:
+                                   print(f'Player error: {e}') if e else self.stream_youtube(url))
 
 
 def get_url():
