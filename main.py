@@ -3,32 +3,17 @@ Script Executions
 """
 import os
 
+from dotenv import load_dotenv
+
 from interface import ModuleSelector
-
-
-# Helper Methods
-
-def get_token(token_path):
-    """Open and read the file containing the token,
-    which should be on a single line."""
-
-    try:
-        with open(token_path, encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        print(f"[WARNING] The specified token file at '{token_path}' was not found.")
-
 
 if __name__ == "__main__":
     """
-    Token controls access to the bot.
-    For safety, it is stored and read from a file that
-    does not get pushed to the repo, and is only saved
-    locally.
+    Token controls access to the Discord bot.
+    For safety, it is passed through an environment variable.
+    You can set the environment variable in your shell,
+    or using a `.env` file which is loaded with `load_dotenv`.
     """
 
-    token = get_token(os.path.join("config", "token.txt"))
-    if token:
-        ModuleSelector(package='examples', token=token).run()
-    else:
-        raise RuntimeError("[INFO] You need a Discord bot token saved under '/config/token.txt'.")
+    load_dotenv()
+    ModuleSelector(package='examples', token=os.environ["DISCORD_BOT_TOKEN"]).run()
