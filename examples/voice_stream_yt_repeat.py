@@ -137,9 +137,13 @@ class VoiceJoinerClient(discord.Client):
         async with self.txt_channel.typing():
             player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
             self.voice_client.play(player,
-                                   after=lambda e:
-                                   print(f'Player error: {e}') if e else (await self.stream_youtube(url) for _ in
-                                                                          '_').__anext__())
+                                   after=lambda e: asyncio.run_coroutine_threadsafe(self.after_play(e), self.loop))
+
+    async def after_play(self, error):
+        if error:
+            print(f'Player error: {error}')
+        else:
+            await self.stream_youtube(url)
 
 
 def get_url():
