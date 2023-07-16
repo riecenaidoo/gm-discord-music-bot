@@ -138,7 +138,7 @@ class VoiceJoinerClient(discord.Client):
             player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
             self.voice_client.play(player,
                                    after=lambda e:
-                                   print(f'Player error: {e}') if e else self.stream_youtube(url))
+                                   print(f'Player error: {e}') if e else await self.stream_youtube(url))
 
 
 def get_url():
