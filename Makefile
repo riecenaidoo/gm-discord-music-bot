@@ -1,3 +1,4 @@
+PYTHON_HOME = python3
 VENV = venv
 PYTHON = $(VENV)/bin/python3
 PIP = $(VENV)/bin/pip
@@ -10,9 +11,9 @@ run: $(VENV)/bin/activate
 	$(PYTHON) main.py
 
 
-venv/bin/activate: requirements.txt
-	$(PYTHON) -m venv $(VENV)
-	$(PIP) install --no-cache-dir -r requirements.txt
+$(VENV)/bin/activate: requirements.txt
+	$(PYTHON_HOME) -m venv $(VENV)
+	$(PIP) install -r requirements.txt
 
 
 clean:
