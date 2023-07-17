@@ -1,7 +1,6 @@
 """Stream the audio from multiple YouTube videos,
 one by one, into a voice channel in the Discord."""
 import asyncio
-import re
 from typing import Any
 
 import discord
@@ -30,8 +29,6 @@ ffmpeg_options = {
 }
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
-
-url = "https://www.youtube.com/watch?v=tiDy3cuscFY"  # TODO Remove
 
 
 class YTDLSource(discord.PCMVolumeTransformer):
@@ -129,7 +126,7 @@ class VoiceJoinerClient(discord.Client):
         """
 
         self.voice_client = await discord.VoiceChannel.connect(joining_channel)
-        await self.stream_youtube(url)
+        await self.stream_youtube(get_url())
 
     async def stream_youtube(self, url: str):
         """Stream the audio of a YouTube video in the joined channel."""
@@ -143,11 +140,13 @@ class VoiceJoinerClient(discord.Client):
         if error:
             print(f'Player error: {error}')
         else:
-            await self.stream_youtube(url)
+            await self.stream_youtube(get_url())
 
 
-def get_url():
-    """"""
+def get_url() -> str:
+    """
+    :return: str containing a URL.
+    """
 
     while True:  # I wish was a do-while loop
         url = input("YouTube Video > ")
@@ -157,18 +156,12 @@ def get_url():
 
 
 def youtube_url_match(url: str) -> bool:
-    """Regex pattern matching a string to check if it contains
-    the video id section that all YouTube video links appear to end with
-    i.e `v=...`.
-
-    This would be the video id sent to the YouTube API.
-
+    """
     :param url: str containing the URL to verify
     :return: true if the URL could be a YouTube video link
     """
 
-    pattern = re.compile("(v=[_0-9A-Za-z]{11})")
-    return re.search(pattern, url) is not None
+    return "youtu" in url
 
 
 def run(token):
