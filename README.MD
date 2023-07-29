@@ -1,10 +1,7 @@
-# Discord Relay Bot (Experimental)
+# Discord Music Bot Experiments
 
-This project intends to create a service that can relay various
-forms of information gathered from a client program,
-into a Discord server, via a locally hosted Discord bot.
-
-This project is still in its early stages of development.
+Learning how to create a Discord music bot by
+experimenting with the Discord.py library.
 
 ## Requirements
 
@@ -18,9 +15,3 @@ This project is still in its early stages of development.
     of multimedia streaming and is required by example snippets
     streaming audio into Discord voice channels. - [Read More](https://ffmpeg.org/)
   - `sudo apt install ffmpeg` or `sudo apk add ffmpeg`
-
-
-## Contributors
-
-- riecenaidoo
-- SuperMagikarp
