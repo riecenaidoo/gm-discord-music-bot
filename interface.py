@@ -5,21 +5,8 @@ import importlib
 import os.path
 import pkgutil
 
-from kivy.app import App
-from kivy.uix.button import Button
-from kivy.uix.gridlayout import GridLayout
 
-"""
-os.environ['KIVY_NO_CONSOLELOG'] = '1'  # Add before Kivy import statements
-
-Disabling Kivy's console log to declutter console while in testing phase
-of development. 
-
-[Read More](https://kivy.org/doc/stable/guide/environment.html)
-"""
-
-
-class ModuleSelector(App):
+class ModuleSelector:
     """Dynamically created gui that enables the user
     to select a specific module from a package and run
     the example code snippet inside it."""
@@ -33,23 +20,16 @@ class ModuleSelector(App):
         super().__init__()
         self.token = token
         self.package = package
+        self.menu = []
 
-    def build(self):
         pkg = importlib.import_module(self.package)
         pkg_path = os.path.dirname(pkg.__file__)
         modules = ([name for _, name, _ in pkgutil.iter_modules([pkg_path])])
 
-        grid = GridLayout(rows=len(modules))
-
         for module in modules:
-            grid.add_widget(Button(
-                text=f"{module}",
-                on_release=self.call
-            ))
+            self.menu.append(f"{module}")
 
-        return grid
-
-    def call(self, instance: Button):
+    def call(self, module_name: str):
         """Handles the execution of the chosen example
         code snippet by dynamically importing the module
         and calling its run method.
@@ -58,6 +38,23 @@ class ModuleSelector(App):
         run() method, which would be their entry point.
         """
 
-        module_name = instance.text
         module = importlib.import_module(name=f"{self.package}.{module_name}", package=self.package)
         module.run(self.token)
+
+    def run(self):
+        print("(Type QUIT to exit)\n\n")
+        print("Example Snippets:")
+        for index, item in enumerate(self.menu):
+            print(f"[{index}] {item}")
+
+        choice = None
+        while choice != "QUIT".casefold():
+            choice = input("Example[?] > ").casefold()
+            try:
+                i = int(choice)
+                if i < 0 or i >= len(self.menu):
+                    print("Please select an item in the list.")
+                    continue
+                self.call(self.menu[i])
+            except ValueError:
+                print("Please choose the 'i' of a snippet i.e: [i] ...")
