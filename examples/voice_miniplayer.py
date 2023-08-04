@@ -8,7 +8,6 @@ import discord
 from discord import Intents
 from dotenv import load_dotenv
 
-from app.miniplayer import Miniplayer
 from youtube.YTDL import YTDLSource
 
 
@@ -63,14 +62,21 @@ class VoiceJoinerClient(discord.Client):
 
         self.voice_client = await discord.VoiceChannel.connect(joining_channel)
         await self.stream_youtube(self.songs.pop())
-        await self.call_miniplayer()
+
+        miniplayer_on = await self.call_miniplayer()
+        while miniplayer_on:
+            miniplayer_on = await self.call_miniplayer()
 
     @to_thread
     def call_miniplayer(self):
-        miniplayer = Miniplayer()
-        miniplayer.pause_button.bind(on_release=lambda x: self.voice_client.pause())
-        miniplayer.resume_button.bind(on_release=lambda x: self.voice_client.resume())
-        miniplayer.run()
+        cmd = input("[PAUSE/PLAY/QUIT] > ").casefold()
+        if cmd == "QUIT".casefold():
+            return False
+        elif cmd == "PAUSE".casefold():
+            self.voice_client.pause()
+        elif cmd == "PLAY".casefold():
+            self.voice_client.resume()
+        return True
 
     async def stream_youtube(self, url: str):
         """Stream the audio of a YouTube video in the joined channel."""
