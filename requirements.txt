@@ -1,5 +1,4 @@
 discord.py
-kivy
 PyNaCl
 git+https://github.com/ytdl-org/youtube-dl.git@master#egg=youtube_dl
 python-dotenv
