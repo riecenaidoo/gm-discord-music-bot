@@ -1,3 +1,5 @@
+"""Discord bot functionality is handled by this module."""
+
 import asyncio
 import functools
 import typing
@@ -18,6 +20,8 @@ def to_thread(func: typing.Callable):
 
 
 class ConsoleClient(discord.Client):
+    """A Discord Client that is controllable by the host via a Console."""
+
     def __init__(self, *, input_method: callable, intents: Intents, **options: Any):
         super().__init__(intents=intents, **options)
         self.console = Console(input_method=input_method)
@@ -30,9 +34,10 @@ class ConsoleClient(discord.Client):
         await self.console.run()
 
     async def quit(self):
-        print(f"[QUIT]")
+        print("[INFO] Shutting down...")
         self.console.online = False
         await self.close()
+        print("[INFO] Farewell!")
 
     async def show_channels(self):
         pass

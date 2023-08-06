@@ -1,7 +1,4 @@
-"""Asynchronous console controls for the Discord bot are managed by this module.
-
-TODO: Testing, Documentation, Singleton Implementation of Console.
-"""
+"""Asynchronous console controls for the Discord bot are managed by this module."""
 
 
 class Command:
@@ -56,8 +53,6 @@ class Console:
         self.commands.append(command)
 
     async def handle_command(self, args: list[str]):
-        """TODO: Raise exceptions"""
-
         for cmd in self.commands:
             if cmd.match(args[0]):
                 await cmd.call(args)
@@ -66,8 +61,6 @@ class Console:
             print("No match")
 
     async def run(self):
-        """TODO: Catch exceptions, end loop, display messages."""
-
         while self.online:
             try:
                 await self.handle_command(self.input_method())
