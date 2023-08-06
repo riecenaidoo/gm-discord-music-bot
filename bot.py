@@ -37,12 +37,23 @@ class ConsoleClient(discord.Client):
         self.console.online = False
         await self.close()
 
+    async def show_channels(self):
+        pass
+
+    async def join_channel(self, channel_index: int):
+        pass
+
     async def play_url(self, url: str):
-        print(f"[PLAY] {url}")
+        pass
+
+    async def pause(self):
+        pass
+
+    async def resume(self):
+        pass
 
     async def set_volume(self, volume: int):
-        print(f"[VOLUME] {volume}")
-
+        pass
 
 
 def run(token):
