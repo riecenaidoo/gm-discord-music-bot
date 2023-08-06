@@ -37,7 +37,6 @@ class ConsoleClient(discord.Client):
         print("[INFO] Shutting down...")
         self.console.online = False
         await self.close()
-        print("[INFO] Farewell!")
 
     async def show_channels(self):
         pass
