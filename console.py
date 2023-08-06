@@ -45,14 +45,6 @@ class VolumeCommand(Command):
         await self.action_func(volume)
 
 
-def get_user_input() -> list[str]:
-    instruction = ""
-    while len(instruction) == 0:
-        instruction = input(" > ")
-
-    return instruction.split(" ")
-
-
 class Console:
 
     def __init__(self, input_method: callable):
@@ -85,12 +77,3 @@ class Console:
 
 class UsageError(Exception):
     pass
-
-
-if __name__ == '__main__':
-    console = Console(input_method=get_user_input)
-
-    console.add_command(PlayCommand("play", lambda args: print(f"[PLAY] {args}")))
-    console.add_command(VolumeCommand("volume", lambda args: print(f"[PLAY] {args}")))
-
-    console.run()

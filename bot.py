@@ -1,14 +1,11 @@
 import asyncio
 import functools
-import os
 import typing
 from typing import Any
 
 import discord
 from discord import Intents
-from dotenv import load_dotenv
 
-import console
 from console import Console, Command, VolumeCommand, PlayCommand
 
 
@@ -56,14 +53,9 @@ class ConsoleClient(discord.Client):
         pass
 
 
-def run(token):
+def run(token: str, input_method: callable):
     intents = discord.Intents.default()
     intents.message_content = True
 
-    client = ConsoleClient(intents=intents, input_method=console.get_user_input)
+    client = ConsoleClient(intents=intents, input_method=input_method)
     client.run(token)
-
-
-if __name__ == '__main__':
-    load_dotenv()
-    run(token=os.environ["DISCORD_BOT_TOKEN"])
