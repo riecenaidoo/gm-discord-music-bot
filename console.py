@@ -5,14 +5,15 @@ TODO: Testing, Documentation, Singleton Implementation of Console.
 
 
 
-def class Command:
+
+class Command:
 
 	def __init__(self, nameMatch:str):
 		self.nameMatch = nameMatch
 		self.func = None
 
 
-	def set_action(action:func):
+	def set_action(action: callable):
 		self.func = func
 
 
@@ -20,11 +21,12 @@ def class Command:
 		return (arg == nameMatch)
 
 
-	def call(args:str[]):
+	def call(args:list(str)):
 		self.func(args)
 
+	
 
-def class Console:
+class Console:
 
 	def __init__(self):
 		self.commands = list()
@@ -34,7 +36,7 @@ def class Console:
 		self.commands.append(command)
 
 
-	def get_input() -> str[]:
+	def get_input() -> list(str):
 		instruction = ""
 		while len(instruction) == 0:
 			instruction = input(" > ")
@@ -42,10 +44,10 @@ def class Console:
 		return instruction.split(" ")
 
 
-	def handle_command(args:str[]):
+	def handle_command(args: list(str)):
 		"""TODO: Raise exceptions"""
 
-		for(Command cmd: self.commands):
+		for cmd in self.commands:
 			if cmd.match(args[0]):
 				cmd.call(args)
 				break
@@ -58,3 +60,33 @@ def class Console:
 
 		while True:
 			handle_command(get_input())
+
+
+if __name__ == '__main__':
+	console = Console()
+
+	play = Command("play")
+	play.set_action(lambda: print("play"))
+	console.add_command(play)
+
+	volume = Command("volume")
+	def vol(args: list(str)):
+		if len(args) < 1:
+			raise UsageError("volume expects an argument")
+
+		volume = args[1]
+
+		try:
+			volume = int(volume)
+		except ValueError:
+			raise UsageError("volume argument must be integer")
+
+		if volume < 0 or volume > 100:
+			raise UsageError("volume must be between 0 & 100")
+
+		print("[VOLUME]")
+
+	volume.set_action(vol)
+
+
+	console.run()
