@@ -8,7 +8,7 @@ import discord
 from discord import Intents
 from dotenv import load_dotenv
 
-from youtube.YTDL import YTDLSource
+from YTDL import YTDLSource
 
 
 def to_thread(func: typing.Callable):
