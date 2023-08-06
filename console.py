@@ -1,4 +1,4 @@
-"""The console controls for the Discord bot are managed by this module.
+"""Asynchronous console controls for the Discord bot are managed by this module.
 
 TODO: Testing, Documentation, Singleton Implementation of Console.
 """
@@ -13,22 +13,22 @@ class Command:
     def match(self, arg: str) -> bool:
         return arg.strip().casefold() == self.name_match
 
-    def call(self, args: list[str]):
-        self.action_func()
+    async def call(self, args: list[str]):
+        await self.action_func()
 
 
 class PlayCommand(Command):
 
-    def call(self, args: list[str]):
+    async def call(self, args: list[str]):
         if len(args) < 2:
             raise UsageError(f"{self.name_match} expects an argument")
 
-        self.action_func(args[1])
+        await self.action_func(args[1])
 
 
 class VolumeCommand(Command):
 
-    def call(self, args: list[str]):
+    async def call(self, args: list[str]):
         if len(args) < 2:
             raise UsageError(f"{self.name_match} expects an argument")
 
@@ -42,10 +42,10 @@ class VolumeCommand(Command):
         if volume < 0 or volume > 100:
             raise UsageError("volume must be between 0 & 100")
 
-        self.action_func(volume)
+        await self.action_func(volume)
 
 
-def get_console_input() -> list[str]:
+def get_user_input() -> list[str]:
     instruction = ""
     while len(instruction) == 0:
         instruction = input(" > ")
@@ -58,26 +58,27 @@ class Console:
     def __init__(self, input_method: callable):
         self.commands = list()
         self.input_method = input_method
+        self.online = True
 
     def add_command(self, command: Command):
         self.commands.append(command)
 
-    def handle_command(self, args: list[str]):
+    async def handle_command(self, args: list[str]):
         """TODO: Raise exceptions"""
 
         for cmd in self.commands:
             if cmd.match(args[0]):
-                cmd.call(args)
+                await cmd.call(args)
                 break
         else:
             print("No match")
 
-    def run(self):
+    async def run(self):
         """TODO: Catch exceptions, end loop, display messages."""
 
-        while True:
+        while self.online:
             try:
-                self.handle_command(self.input_method())
+                await self.handle_command(self.input_method())
             except UsageError as e:
                 print(f"Usage Error: {e.args[0]}")
 
@@ -87,7 +88,7 @@ class UsageError(Exception):
 
 
 if __name__ == '__main__':
-    console = Console(input_method=get_console_input)
+    console = Console(input_method=get_user_input)
 
     console.add_command(PlayCommand("play", lambda args: print(f"[PLAY] {args}")))
     console.add_command(VolumeCommand("volume", lambda args: print(f"[PLAY] {args}")))

@@ -8,7 +8,8 @@ import discord
 from discord import Intents
 from dotenv import load_dotenv
 
-from console import Console, VolumeCommand, PlayCommand, get_console_input
+import console
+from console import Console, Command, VolumeCommand, PlayCommand
 
 
 def to_thread(func: typing.Callable):
@@ -20,16 +21,21 @@ def to_thread(func: typing.Callable):
 
 
 class ConsoleClient(discord.Client):
-    def __init__(self, *, intents: Intents, **options: Any):
+    def __init__(self, *, input_method: callable, intents: Intents, **options: Any):
         super().__init__(intents=intents, **options)
+        self.console = Console(input_method=input_method)
+
+        self.console.add_command(PlayCommand("play", self.play_url))
+        self.console.add_command(VolumeCommand("volume", self.set_volume))
+        self.console.add_command(Command("quit", self.quit))
 
     async def on_ready(self):
-        console = Console(input_method=get_console_input)
+        await self.console.run()
 
-        console.add_command(PlayCommand("play", self.play_url))
-        console.add_command(VolumeCommand("volume", self.set_volume))
-
-        await to_thread(console.run)()
+    async def quit(self):
+        print(f"[QUIT]")
+        self.console.online = False
+        await self.close()
 
     async def play_url(self, url: str):
         print(f"[PLAY] {url}")
@@ -38,11 +44,12 @@ class ConsoleClient(discord.Client):
         print(f"[VOLUME] {volume}")
 
 
+
 def run(token):
     intents = discord.Intents.default()
     intents.message_content = True
 
-    client = ConsoleClient(intents=intents)
+    client = ConsoleClient(intents=intents, input_method=console.get_user_input)
     client.run(token)
 
 
