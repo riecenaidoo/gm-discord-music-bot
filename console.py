@@ -87,7 +87,7 @@ class UsageError(Exception):
 
 
 if __name__ == '__main__':
-    console = Console(get_console_input)
+    console = Console(input_method=get_console_input)
 
     console.add_command(PlayCommand("play", lambda args: print(f"[PLAY] {args}")))
     console.add_command(VolumeCommand("volume", lambda args: print(f"[PLAY] {args}")))
