@@ -1,17 +1,19 @@
-# Discord Music Bot Experiments
+# Discord Console Bot
 
-Learning how to create a Discord music bot by
-experimenting with the Discord.py library.
+A command-less Discord music bot using the Discord.py library.
+The bot is controlled via the console of the host machine,
+instead of slash commands in Discord.
+The bot will eventually be controlled by a client program
+of a socket.
 
 ## Requirements
 
-- Python3 & Pip
+- Python3 & Pip Package Manager
 - [Discord Bot Token](https://discord.com/developers/applications)
   - To run the script, pass the token as the environment variable `DISCORD_BOT_TOKEN`
     manually, or [using a `.env` file](https://pypi.org/project/python-dotenv/).
   - The token controls access to your Bot, so keep it safe.
 - ffmpeg
   - FFMPEG is an open-source suite of libraries for handling various types
-    of multimedia streaming and is required by example snippets
-    streaming audio into Discord voice channels. - [Read More](https://ffmpeg.org/)
+    of multimedia streaming. - [Read More](https://ffmpeg.org/)
   - `sudo apt install ffmpeg` or `sudo apk add ffmpeg`

@@ -5,7 +5,8 @@ from typing import Any
 
 import discord
 from discord import Intents
-from youtube.YTDL import YTDLSource
+
+from YTDL import YTDLSource
 
 
 class VoiceJoinerClient(discord.Client):

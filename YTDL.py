@@ -1,3 +1,5 @@
+"""youtube_dl logic is handled by this module."""
+
 import asyncio
 
 import discord
