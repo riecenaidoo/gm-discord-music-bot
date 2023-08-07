@@ -15,7 +15,7 @@ class ConsoleClient(discord.Client):
         self.text_channels = []
         self.voice_channels = []
         self.voice_client = None
-        self.volume = 1.0  # 100%
+        self.player = None
 
     def build_console(self):
         self.console.add_command(PlayCommand("play", self.play_url))
@@ -72,8 +72,8 @@ class ConsoleClient(discord.Client):
     async def play_url(self, url: str):
         if self.voice_client is not None:
             async with self.text_channels[len(self.text_channels)-1].typing():
-                player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
-                self.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
+                self.player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
+                self.voice_client.play(self.player, after=lambda e: print(f'Player error: {e}') if e else None)
 
     async def pause(self):
         if self.voice_client is not None:
@@ -84,13 +84,13 @@ class ConsoleClient(discord.Client):
             self.voice_client.resume()
 
     async def set_volume(self, volume: int):
-        volume = float(volume)
-        volume /= 100
-        if 0.0 < volume <= 1.0:
-            self.volume = volume
-            # self.voice_client._player.volume(volume)  # TODO: How to access this and change
-        else:
-            print("[WARNING] Invalid volume level!")
+        if self.player is not None:
+            volume = float(volume)
+            volume /= 100
+            if 0.0 < volume <= 1.0:
+                self.player.volume = volume
+            else:
+                print("[WARNING] Invalid volume level!")
 
 
 def run(token: str, input_method: callable):
