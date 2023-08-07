@@ -25,7 +25,11 @@ class ConsoleClient(discord.Client):
     def __init__(self, *, input_method: callable, intents: Intents, **options: Any):
         super().__init__(intents=intents, **options)
         self.console = Console(input_method=input_method)
+        self.build_console()
+        self.voice_channels = []
+        self.voice_client = None
 
+    def build_console(self):
         self.console.add_command(PlayCommand("play", self.play_url))
         self.console.add_command(Command("pause", self.pause))
         self.console.add_command(Command("resume", self.resume))
@@ -35,7 +39,13 @@ class ConsoleClient(discord.Client):
         self.console.add_command(Command("leave", self.leave_channel))
         self.console.add_command(Command("quit", self.quit))
 
+    def load_voice_channels(self):
+        for guild in self.guilds:
+            for channel in guild.voice_channels:
+                self.voice_channels.append(channel)
+
     async def on_ready(self):
+        self.load_voice_channels()
         await self.console.run()
 
     async def quit(self):
@@ -44,22 +54,26 @@ class ConsoleClient(discord.Client):
         await self.close()
 
     async def get_voice_channels(self):
-        pass
+        for index, channel in enumerate(self.voice_channels):
+            print(f"[{index}] - {channel}")
 
     async def join_channel(self, channel_index: int):
-        pass
+        if(channel_index >= 0) and (channel_index < len(self.voice_channels)):
+            self.voice_client = await discord.VoiceChannel.connect(self.voice_channels[channel_index])
+        else:
+            print("[WARNING] Invalid channel index!")
 
     async def leave_channel(self):
-        pass
+        await self.voice_client.disconnect()
 
     async def play_url(self, url: str):
         pass
 
     async def pause(self):
-        pass
+        await self.voice_client.pause()
 
     async def resume(self):
-        pass
+        await self.voice_client.resume()
 
     async def set_volume(self, volume: int):
         pass
