@@ -45,6 +45,8 @@ class ConsoleClient(discord.Client):
     async def quit(self):
         print("[INFO] Shutting down...")
         self.console.online = False
+        # TODO: Close quietly by stopping the music player
+        await self.leave_channel()
         await self.close()
 
     async def get_voice_channels(self):
@@ -52,6 +54,11 @@ class ConsoleClient(discord.Client):
             print(f"[{index}] - {channel}")
 
     async def join_channel(self, channel_index: int):
+        if self.voice_client is not None:
+            # TODO: Joining while already in a channel should trigger a move_to
+            print("[WARNING] Already in a channel!")
+            return
+
         if (channel_index >= 0) and (channel_index < len(self.voice_channels)):
             self.voice_client = await discord.VoiceChannel.connect(self.voice_channels[channel_index])
         else:
@@ -63,10 +70,10 @@ class ConsoleClient(discord.Client):
             self.voice_client = None
 
     async def play_url(self, url: str):
-        # TODO: This seems to now be broken
-        async with self.text_channels[len(self.text_channels)-1].typing():
-            player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
-            self.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
+        if self.voice_client is not None:
+            async with self.text_channels[len(self.text_channels)-1].typing():
+                player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
+                self.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
 
     async def pause(self):
         if self.voice_client is not None:
