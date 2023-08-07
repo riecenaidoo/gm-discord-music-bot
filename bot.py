@@ -60,6 +60,7 @@ class ConsoleClient(discord.Client):
     async def leave_channel(self):
         if self.voice_client is not None:
             await self.voice_client.disconnect()
+            self.voice_client = None
 
     async def play_url(self, url: str):
         # TODO: This seems to now be broken
