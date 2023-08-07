@@ -1,5 +1,5 @@
 # Virutal Environment
-venv
+.venv
 
 # IDE Configurations
 .vscode
