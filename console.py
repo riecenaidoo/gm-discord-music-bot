@@ -34,12 +34,31 @@ class VolumeCommand(Command):
         try:
             volume = int(volume)
         except ValueError:
-            raise UsageError("volume argument must be integer")
+            raise UsageError(f"{self.name_match} argument must be integer")
 
         if volume < 0 or volume > 100:
-            raise UsageError("volume must be between 0 & 100")
+            raise UsageError(f"{self.name_match} must be between 0 & 100")
 
         await self.action_func(volume)
+
+
+class JoinChannelCommand(Command):
+
+    async def call(self, args: list[str]):
+        if len(args) < 2:
+            raise UsageError(f"{self.name_match} expects an argument")
+
+        index = args[1]
+
+        try:
+            index = int(index)
+        except ValueError:
+            raise UsageError(f"{self.name_match} argument must be integer")
+
+        if index < 0:
+            raise UsageError(f"{self.name_match} must be index (greater than 0)")
+
+        await self.action_func(index)
 
 
 class Console:
