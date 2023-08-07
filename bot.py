@@ -8,6 +8,7 @@ from typing import Any
 import discord
 from discord import Intents
 
+from YTDL import YTDLSource
 from console import Console, Command, VolumeCommand, PlayCommand, JoinChannelCommand
 
 
@@ -26,8 +27,10 @@ class ConsoleClient(discord.Client):
         super().__init__(intents=intents, **options)
         self.console = Console(input_method=input_method)
         self.build_console()
+        self.text_channels = []
         self.voice_channels = []
         self.voice_client = None
+        self.volume = 1.0  # 100%
 
     def build_console(self):
         self.console.add_command(PlayCommand("play", self.play_url))
@@ -44,8 +47,14 @@ class ConsoleClient(discord.Client):
             for channel in guild.voice_channels:
                 self.voice_channels.append(channel)
 
+    def load_text_channels(self):
+        for guild in self.guilds:
+            for channel in guild.text_channels:
+                self.text_channels.append(channel)
+
     async def on_ready(self):
         self.load_voice_channels()
+        self.load_text_channels()
         await self.console.run()
 
     async def quit(self):
@@ -58,7 +67,7 @@ class ConsoleClient(discord.Client):
             print(f"[{index}] - {channel}")
 
     async def join_channel(self, channel_index: int):
-        if(channel_index >= 0) and (channel_index < len(self.voice_channels)):
+        if (channel_index >= 0) and (channel_index < len(self.voice_channels)):
             self.voice_client = await discord.VoiceChannel.connect(self.voice_channels[channel_index])
         else:
             print("[WARNING] Invalid channel index!")
@@ -67,7 +76,10 @@ class ConsoleClient(discord.Client):
         await self.voice_client.disconnect()
 
     async def play_url(self, url: str):
-        pass
+        # TODO: This seems to now be broken
+        async with self.text_channels[len(self.text_channels)-1].typing():
+            player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
+            self.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
 
     async def pause(self):
         await self.voice_client.pause()
@@ -76,7 +88,13 @@ class ConsoleClient(discord.Client):
         await self.voice_client.resume()
 
     async def set_volume(self, volume: int):
-        pass
+        volume = float(volume)
+        volume /= 100
+        if 0.0 < volume <= 1.0:
+            self.volume = volume
+            # self.voice_client._player.volume(volume)  # TODO: How to access this and change
+        else:
+            print("[WARNING] Invalid volume level!")
 
 
 def run(token: str, input_method: callable):
