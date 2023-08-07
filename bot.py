@@ -73,7 +73,8 @@ class ConsoleClient(discord.Client):
             print("[WARNING] Invalid channel index!")
 
     async def leave_channel(self):
-        await self.voice_client.disconnect()
+        if self.voice_client is not None:
+            await self.voice_client.disconnect()
 
     async def play_url(self, url: str):
         # TODO: This seems to now be broken
@@ -82,10 +83,12 @@ class ConsoleClient(discord.Client):
             self.voice_client.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
 
     async def pause(self):
-        await self.voice_client.pause()
+        if self.voice_client is not None:
+            self.voice_client.pause()
 
     async def resume(self):
-        await self.voice_client.resume()
+        if self.voice_client is not None:
+            self.voice_client.resume()
 
     async def set_volume(self, volume: int):
         volume = float(volume)
