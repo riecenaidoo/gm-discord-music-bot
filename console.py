@@ -1,4 +1,14 @@
 """Asynchronous console controls for the Discord bot are managed by this module."""
+import asyncio
+import functools
+import typing
+
+def to_thread(func: typing.Callable):
+    @functools.wraps(func)
+    async def wrapper(*args, **kwargs):
+        return await asyncio.to_thread(func, *args, **kwargs)
+
+    return wrapper
 
 
 class Command:
@@ -34,19 +44,38 @@ class VolumeCommand(Command):
         try:
             volume = int(volume)
         except ValueError:
-            raise UsageError("volume argument must be integer")
+            raise UsageError(f"{self.name_match} argument must be integer")
 
         if volume < 0 or volume > 100:
-            raise UsageError("volume must be between 0 & 100")
+            raise UsageError(f"{self.name_match} must be between 0 & 100")
 
         await self.action_func(volume)
+
+
+class JoinChannelCommand(Command):
+
+    async def call(self, args: list[str]):
+        if len(args) < 2:
+            raise UsageError(f"{self.name_match} expects an argument")
+
+        index = args[1]
+
+        try:
+            index = int(index)
+        except ValueError:
+            raise UsageError(f"{self.name_match} argument must be integer")
+
+        if index < 0:
+            raise UsageError(f"{self.name_match} must be index (greater than 0)")
+
+        await self.action_func(index)
 
 
 class Console:
 
     def __init__(self, input_method: callable):
         self.commands = list()
-        self.input_method = input_method
+        self.input_method = to_thread(input_method)
         self.online = True
 
     def add_command(self, command: Command):
@@ -63,7 +92,8 @@ class Console:
     async def run(self):
         while self.online:
             try:
-                await self.handle_command(self.input_method())
+                user_in = await self.input_method()
+                await self.handle_command(user_in)
             except UsageError as e:
                 print(f"Usage Error: {e.args[0]}")
 
