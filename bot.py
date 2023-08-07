@@ -1,24 +1,9 @@
 """Discord bot functionality is handled by this module."""
-
-import asyncio
-import functools
-import typing
-from typing import Any
-
 import discord
 from discord import Intents
-
+from typing import Any
 from YTDL import YTDLSource
 from console import Console, Command, VolumeCommand, PlayCommand, JoinChannelCommand
-
-
-def to_thread(func: typing.Callable):
-    @functools.wraps(func)
-    async def wrapper(*args, **kwargs):
-        return await asyncio.to_thread(func, *args, **kwargs)
-
-    return wrapper
-
 
 class ConsoleClient(discord.Client):
     """A Discord Client that is controllable by the host via a Console."""

@@ -1,4 +1,14 @@
 """Asynchronous console controls for the Discord bot are managed by this module."""
+import asyncio
+import functools
+import typing
+
+def to_thread(func: typing.Callable):
+    @functools.wraps(func)
+    async def wrapper(*args, **kwargs):
+        return await asyncio.to_thread(func, *args, **kwargs)
+
+    return wrapper
 
 
 class Command:
@@ -65,7 +75,7 @@ class Console:
 
     def __init__(self, input_method: callable):
         self.commands = list()
-        self.input_method = input_method
+        self.input_method = to_thread(input_method)
         self.online = True
 
     def add_command(self, command: Command):
@@ -82,7 +92,8 @@ class Console:
     async def run(self):
         while self.online:
             try:
-                await self.handle_command(self.input_method())
+                user_in = await self.input_method()
+                await self.handle_command(user_in)
             except UsageError as e:
                 print(f"Usage Error: {e.args[0]}")
 
