@@ -1,9 +1,12 @@
 """Discord bot functionality is handled by this module."""
+from typing import Any
+
 import discord
 from discord import Intents
-from typing import Any
+
 from YTDL import YTDLSource
 from console import Console, Command, VolumeCommand, PlayCommand, JoinChannelCommand
+
 
 class ConsoleClient(discord.Client):
     """A Discord Client that is controllable by the host via a Console."""
@@ -21,6 +24,7 @@ class ConsoleClient(discord.Client):
         self.console.add_command(PlayCommand("play", self.play_url))
         self.console.add_command(Command("pause", self.pause))
         self.console.add_command(Command("resume", self.resume))
+        self.console.add_command(Command("stop", self.stop))
         self.console.add_command(VolumeCommand("volume", self.set_volume))
         self.console.add_command(Command("channels", self.get_voice_channels))
         self.console.add_command(JoinChannelCommand("join", self.join_channel))
@@ -45,7 +49,6 @@ class ConsoleClient(discord.Client):
     async def quit(self):
         print("[INFO] Shutting down...")
         self.console.online = False
-        # TODO: Close quietly by stopping the music player
         await self.leave_channel()
         await self.close()
 
@@ -55,8 +58,7 @@ class ConsoleClient(discord.Client):
 
     async def join_channel(self, channel_index: int):
         if self.voice_client is not None:
-            # TODO: Joining while already in a channel should trigger a move_to
-            print("[WARNING] Already in a channel!")
+            await self.voice_client.move_to(self.voice_channels[channel_index])
             return
 
         if (channel_index >= 0) and (channel_index < len(self.voice_channels)):
@@ -65,24 +67,29 @@ class ConsoleClient(discord.Client):
             print("[WARNING] Invalid channel index!")
 
     async def leave_channel(self):
-        # TODO: Should stop player before leaving a channel
         if self.voice_client is not None:
+            self.voice_client.stop()
             await self.voice_client.disconnect()
             self.voice_client = None
 
     async def play_url(self, url: str):
         if self.voice_client is not None:
-            async with self.text_channels[len(self.text_channels)-1].typing():
+            self.voice_client.stop()
+            async with self.text_channels[len(self.text_channels) - 1].typing():
                 self.player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
                 self.voice_client.play(self.player, after=lambda e: print(f'Player error: {e}') if e else None)
 
     async def pause(self):
-        if self.player is not None:
+        if self.voice_client is not None:
             self.voice_client.pause()
 
     async def resume(self):
-        if self.player is not None:
+        if self.voice_client is not None:
             self.voice_client.resume()
+
+    async def stop(self):
+        if self.voice_client is not None:
+            self.voice_client.stop()
 
     async def set_volume(self, volume: int):
         if self.player is not None:
