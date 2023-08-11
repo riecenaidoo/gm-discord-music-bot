@@ -25,7 +25,7 @@ class TestMusicQueue(unittest.TestCase):
         playlist.add("a")
         playlist.add("b")
         playlist.add("c")
-        playlist.loop()
+        playlist.loop_mode()
 
         self.assertEqual(playlist.next(), "a")
         self.assertEqual(playlist.next(), "b")
@@ -39,7 +39,7 @@ class TestMusicQueue(unittest.TestCase):
         playlist.add("a")
         playlist.add("b")
         playlist.add("c")
-        playlist.repeat()
+        playlist.repeat_mode()
 
         self.assertEqual(playlist.next(), "a")
         self.assertEqual(playlist.next(), "a")
@@ -48,17 +48,19 @@ class TestMusicQueue(unittest.TestCase):
     def test_prev(self):
         playlist = MusicQueue()
         playlist.add("a")
-        playlist.next()
-        self.assertEqual(playlist.prev(), "a")
-
         playlist.add("b")
-        playlist.add("c")
-        playlist.next()
-        playlist.next()
-        self.assertEqual(playlist.prev(), "c")
-        self.assertEqual(playlist.prev(), "b")
+        playlist.next()  # Playing a
         try:
             playlist.prev()
-            self.fail("Should throw an error!")
+            self.fail("Should throw an error! There is no previous song. 'a' is currently playing!")
+        except ExhaustedException:
+            pass
+
+        playlist.next()  # Playing b
+        self.assertEqual(playlist.prev(), "a")
+
+        try:
+            playlist.prev()
+            self.fail("Should throw an error! There is no previous song before 'a'.")
         except ExhaustedException:
             pass

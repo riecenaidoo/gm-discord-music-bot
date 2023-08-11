@@ -3,6 +3,7 @@ import asyncio
 import functools
 import typing
 
+
 def to_thread(func: typing.Callable):
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
@@ -69,6 +70,17 @@ class JoinChannelCommand(Command):
             raise UsageError(f"{self.name_match} must be index (greater than 0)")
 
         await self.action_func(index)
+
+
+class QueueCommand(Command):
+    """repeatedly calls the Queue method of the bot until it has queued all arguments."""
+
+    async def call(self, args: list[str]):
+        if len(args) < 2:
+            raise UsageError(f"{self.name_match} expects an argument")
+
+        for url in args[1:]:
+            await self.action_func(url)
 
 
 class Console:

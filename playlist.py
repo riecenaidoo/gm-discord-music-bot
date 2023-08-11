@@ -21,6 +21,9 @@ class MusicQueue:
     def add(self, url: str):
         self.playlist.append(url)
 
+    def add_first(self, url: str):
+        self.playlist.insert(0, url)
+
     def next(self) -> str:
         """
         throws: ExhaustedException if there is no next element.
@@ -54,21 +57,21 @@ class MusicQueue:
         """
         throws: ExhaustedException if there is no prev element.
         """
-        if len(self.recently_played) <= 0:
+        if len(self.recently_played) <= 1:
             raise ExhaustedException
-        # The last played song would have been appended to the end
-        return self.recently_played.pop(len(self.recently_played) - 1)
+        # The currently playing song is the last element, so we must go one before
+        return self.recently_played.pop(len(self.recently_played) - 2)
 
-    def normal(self):
+    def default_mode(self):
         self.mode = PlaylistMode(PlaylistMode.SEQUENCE)
 
-    def shuffle(self):
+    def shuffle_mode(self):
         self.mode = PlaylistMode(PlaylistMode.SHUFFLE)
 
-    def loop(self):
+    def loop_mode(self):
         self.mode = PlaylistMode(PlaylistMode.LOOP)
 
-    def repeat(self):
+    def repeat_mode(self):
         self.mode = PlaylistMode(PlaylistMode.REPEAT)
 
     def clear(self):
@@ -88,7 +91,7 @@ if __name__ == '__main__':
     p.add("c")
     p.add("d")
     p.add("e")
-    p.shuffle()
+    p.shuffle_mode()
     print(p.next())
     print(p.next())
     print(p.next())

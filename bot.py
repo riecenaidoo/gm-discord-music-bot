@@ -6,7 +6,7 @@ import discord
 from discord import Intents
 
 from YTDL import YTDLSource
-from console import Console, Command, VolumeCommand, PlayCommand, JoinChannelCommand
+from console import Console, Command, VolumeCommand, PlayCommand, JoinChannelCommand, QueueCommand
 from playlist import MusicQueue, ExhaustedException
 
 
@@ -33,6 +33,15 @@ class ConsoleClient(discord.Client):
         self.console.add_command(JoinChannelCommand("join", self.join_channel))
         self.console.add_command(Command("leave", self.leave_channel))
         self.console.add_command(Command("quit", self.quit))
+        # Enhanced Commands
+        self.console.add_command(QueueCommand("queue", self.queue))
+        self.console.add_command(Command("clear", self.clear_queue))
+        self.console.add_command(Command("skip", self.skip_song))
+        self.console.add_command(Command("prev", self.prev_song))
+        self.console.add_command(Command("shuffle", self.playlist_shuffle))
+        self.console.add_command(Command("loop", self.playlist_loop))
+        self.console.add_command(Command("repeat", self.playlist_repeat))
+        self.console.add_command(Command("start", self.start_playing))
 
     def load_voice_channels(self):
         for guild in self.guilds:
@@ -80,7 +89,7 @@ class ConsoleClient(discord.Client):
         if self.voice_client is not None:
             self.playlist.clear()
             self.voice_client.stop()
-        await self.play(url)
+            await self.play(url)
 
     async def play(self, url):
         """Plays a YouTube URL"""
@@ -90,7 +99,7 @@ class ConsoleClient(discord.Client):
                                    after=lambda e: asyncio.run_coroutine_threadsafe(self.play_next(e),
                                                                                     self.loop))
 
-    async def play_next(self, error):
+    async def play_next(self, error=None):
         """Callback function of bot#play which is used to play through the
         songs in queue."""
         if error:
@@ -102,6 +111,9 @@ class ConsoleClient(discord.Client):
             except ExhaustedException:
                 print("No more songs.")
 
+    async def queue(self, url: str):
+        self.playlist.add(url)
+
     async def pause(self):
         if self.voice_client is not None:
             self.voice_client.pause()
@@ -110,9 +122,29 @@ class ConsoleClient(discord.Client):
         if self.voice_client is not None:
             self.voice_client.resume()
 
-    async def stop(self):
+    async def skip_song(self):
         if self.voice_client is not None:
             self.voice_client.stop()
+
+    async def prev_song(self):
+        if self.voice_client is not None:
+            try:
+                self.playlist.add_first(self.playlist.prev())
+                self.voice_client.stop()
+            except ExhaustedException:
+                print("No more songs")
+
+    async def stop(self):
+        if self.voice_client is not None:
+            await self.clear_queue()
+            self.voice_client.stop()
+
+    async def start_playing(self):
+        if self.voice_client is not None:
+            await self.play_next()
+
+    async def clear_queue(self):
+        self.playlist.clear()
 
     async def set_volume(self, volume: int):
         if self.player is not None:
@@ -122,6 +154,18 @@ class ConsoleClient(discord.Client):
                 self.player.volume = volume
             else:
                 print("[WARNING] Invalid volume level!")
+
+    async def playlist_shuffle(self):
+        self.playlist.shuffle_mode()
+
+    async def playlist_loop(self):
+        self.playlist.loop_mode()
+
+    async def playlist_repeat(self):
+        self.playlist.repeat_mode()
+
+    async def playlist_default(self):
+        self.playlist.default_mode()
 
 
 def run(token: str, input_method: callable):
