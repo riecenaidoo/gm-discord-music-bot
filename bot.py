@@ -125,10 +125,6 @@ class ConsoleClient(discord.Client):
     async def skip_song(self):
         if self.voice_client is not None:
             self.voice_client.stop()
-            try:
-                await self.play(self.playlist.next())
-            except ExhaustedException:
-                print("No more songs")
 
     async def prev_song(self):
         if self.voice_client is not None:
@@ -140,6 +136,7 @@ class ConsoleClient(discord.Client):
 
     async def stop(self):
         if self.voice_client is not None:
+            await self.clear_queue()
             self.voice_client.stop()
 
     async def start_playing(self):
