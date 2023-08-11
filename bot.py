@@ -131,9 +131,9 @@ class ConsoleClient(discord.Client):
 
     async def prev_song(self):
         if self.voice_client is not None:
-            self.voice_client.stop()
             try:
-                await self.play(self.playlist.prev())
+                self.playlist.add_first(self.playlist.prev())
+                self.voice_client.stop()
             except ExhaustedException:
                 print("No more songs")
 

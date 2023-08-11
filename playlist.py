@@ -21,6 +21,9 @@ class MusicQueue:
     def add(self, url: str):
         self.playlist.append(url)
 
+    def add_first(self, url: str):
+        self.playlist.insert(0, url)
+
     def next(self) -> str:
         """
         throws: ExhaustedException if there is no next element.
