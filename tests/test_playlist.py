@@ -49,12 +49,18 @@ class TestMusicQueue(unittest.TestCase):
         playlist = MusicQueue()
         playlist.add("a")
         playlist.add("b")
-        playlist.next()
+        playlist.next()  # Playing a
         try:
             playlist.prev()
             self.fail("Should throw an error! There is no previous song. 'a' is currently playing!")
         except ExhaustedException:
             pass
 
-        playlist.next()
+        playlist.next()  # Playing b
         self.assertEqual(playlist.prev(), "a")
+
+        try:
+            playlist.prev()
+            self.fail("Should throw an error! There is no previous song before 'a'.")
+        except ExhaustedException:
+            pass
