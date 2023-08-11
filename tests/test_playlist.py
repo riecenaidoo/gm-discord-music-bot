@@ -48,15 +48,15 @@ class TestMusicQueue(unittest.TestCase):
     def test_prev(self):
         playlist = MusicQueue()
         playlist.add("a")
+        playlist.next()
+        self.assertEqual(playlist.prev(), "a")
+
         playlist.add("b")
         playlist.add("c")
         playlist.next()
         playlist.next()
-        playlist.next()
-
-        self.assertEqual(playlist.prev(), "a")
-        self.assertEqual(playlist.prev(), "b")
         self.assertEqual(playlist.prev(), "c")
+        self.assertEqual(playlist.prev(), "b")
         try:
             playlist.prev()
             self.fail("Should throw an error!")
