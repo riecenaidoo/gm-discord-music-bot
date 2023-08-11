@@ -1,7 +1,7 @@
 """Tools for managing the playlist of the bot."""
 
-from enum import Enum
 import random
+from enum import Enum
 
 
 class PlaylistMode(Enum):
@@ -14,27 +14,26 @@ class PlaylistMode(Enum):
 class MusicQueue:
 
     def __init__(self):
-        self.playlist = list(str)
-        self.recently_played = list(str)
+        self.playlist = list()
+        self.recently_played = list()
         self.mode = PlaylistMode(PlaylistMode.SEQUENCE)
 
     def add(self, url: str):
         self.playlist.append(url)
 
     def next(self) -> str:
-
-        if self.mode.__eq__(PlaylistMode.SEQUENCE):
+        if self.mode == PlaylistMode.SEQUENCE:
             song = self.playlist.pop(0)
             self.recently_played.append(song)
             return song
-        elif self.mode.__eq__(PlaylistMode.SHUFFLE):
+        elif self.mode == PlaylistMode.SHUFFLE:
             i = random.randint(0, len(self.playlist))
             song = self.playlist.pop(i)
             self.recently_played.append(song)
             return song
-        elif self.mode.__eq__(PlaylistMode.REPEAT):
+        elif self.mode == PlaylistMode.REPEAT:
             return self.playlist[0]
-        elif self.mode.__eq__(PlaylistMode.LOOP):
+        elif self.mode == PlaylistMode.LOOP:
             pass
 
     def prev(self) -> str:
@@ -53,4 +52,4 @@ class MusicQueue:
         self.mode = PlaylistMode(PlaylistMode.REPEAT)
 
     def clear(self):
-        self.playlist = list(str)
+        self.playlist = list()
