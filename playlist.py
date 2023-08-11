@@ -35,10 +35,17 @@ class MusicQueue:
             song = self.playlist.pop(i)
             self.recently_played.append(song)
             return song
+        elif self.mode == PlaylistMode.LOOP:
+            if len(self.playlist) <= 0:
+                for song in self.recently_played:
+                    self.playlist.append(song)
+                self.recently_played.clear()
+            song = self.playlist.pop(0)
+            self.recently_played.append(song)
+            return song
+
         elif self.mode == PlaylistMode.REPEAT:
             return self.playlist[0]
-        elif self.mode == PlaylistMode.LOOP:
-            pass
 
     def prev(self) -> str:
         return self.recently_played.pop(len(self.recently_played) - 1)
@@ -56,7 +63,8 @@ class MusicQueue:
         self.mode = PlaylistMode(PlaylistMode.REPEAT)
 
     def clear(self):
-        self.playlist = list()
+        self.playlist.clear()
+        self.recently_played.clear()
 
 
 class ExhaustedException(Exception):
