@@ -57,10 +57,10 @@ class MusicQueue:
         """
         throws: ExhaustedException if there is no prev element.
         """
-        if len(self.recently_played) <= 0:
+        if len(self.recently_played) <= 1:
             raise ExhaustedException
-        # The last played song would have been appended to the end
-        return self.recently_played.pop(len(self.recently_played) - 1)
+        # The currently playing song is the last element, so we must go one before
+        return self.recently_played.pop(len(self.recently_played) - 2)
 
     def default_mode(self):
         self.mode = PlaylistMode(PlaylistMode.SEQUENCE)
