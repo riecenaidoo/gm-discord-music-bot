@@ -1,6 +1,6 @@
 import unittest
 
-from playlist import MusicQueue
+from playlist import MusicQueue, ExhaustedException
 
 
 class TestMusicQueue(unittest.TestCase):
@@ -14,7 +14,11 @@ class TestMusicQueue(unittest.TestCase):
         self.assertEqual(playlist.next(), "a")
         self.assertEqual(playlist.next(), "b")
         self.assertEqual(playlist.next(), "c")
-        self.assertEqual(playlist.next(), None)
+        try:
+            playlist.next()
+            self.fail("Should throw an error!")
+        except ExhaustedException:
+            pass
 
     def test_loop_next(self):
         playlist = MusicQueue()

@@ -23,10 +23,14 @@ class MusicQueue:
 
     def next(self) -> str:
         if self.mode == PlaylistMode.SEQUENCE:
+            if len(self.playlist) <= 0:
+                raise ExhaustedException
             song = self.playlist.pop(0)
             self.recently_played.append(song)
             return song
         elif self.mode == PlaylistMode.SHUFFLE:
+            if len(self.playlist) <= 0:
+                raise ExhaustedException
             i = random.randint(0, len(self.playlist))
             song = self.playlist.pop(i)
             self.recently_played.append(song)
@@ -53,3 +57,7 @@ class MusicQueue:
 
     def clear(self):
         self.playlist = list()
+
+
+class ExhaustedException(Exception):
+    pass
