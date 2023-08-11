@@ -22,6 +22,9 @@ class MusicQueue:
         self.playlist.append(url)
 
     def next(self) -> str:
+        """
+        throws: ExhaustedException if there is no next element.
+        """
         if self.mode == PlaylistMode.SEQUENCE:
             if len(self.playlist) <= 0:
                 raise ExhaustedException
@@ -48,6 +51,9 @@ class MusicQueue:
             return self.playlist[0]
 
     def prev(self) -> str:
+        """
+        throws: ExhaustedException if there is no prev element.
+        """
         if len(self.recently_played) <= 0:
             raise ExhaustedException
         # The last played song would have been appended to the end
