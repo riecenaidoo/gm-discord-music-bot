@@ -6,7 +6,7 @@ import discord
 from discord import Intents
 
 from YTDL import YTDLSource
-from console import Console, Command, VolumeCommand, PlayCommand, JoinChannelCommand
+from console import Console, Command, VolumeCommand, PlayCommand, JoinChannelCommand, QueueCommand
 from playlist import MusicQueue, ExhaustedException
 
 
@@ -33,6 +33,14 @@ class ConsoleClient(discord.Client):
         self.console.add_command(JoinChannelCommand("join", self.join_channel))
         self.console.add_command(Command("leave", self.leave_channel))
         self.console.add_command(Command("quit", self.quit))
+        # Enhanced Commands
+        self.console.add_command(QueueCommand("queue", self.queue))
+        self.console.add_command(Command("clear", self.clear_queue))
+        self.console.add_command(Command("skip", self.skip_song))
+        self.console.add_command(Command("prev", self.prev_song))
+        self.console.add_command(Command("shuffle", self.playlist_shuffle))
+        self.console.add_command(Command("loop", self.playlist_loop))
+        self.console.add_command(Command("repeat", self.playlist_repeat))
 
     def load_voice_channels(self):
         for guild in self.guilds:
@@ -102,6 +110,9 @@ class ConsoleClient(discord.Client):
             except ExhaustedException:
                 print("No more songs.")
 
+    async def queue(self, url: str):
+        self.playlist.add(url)
+
     async def pause(self):
         if self.voice_client is not None:
             self.voice_client.pause()
@@ -110,9 +121,28 @@ class ConsoleClient(discord.Client):
         if self.voice_client is not None:
             self.voice_client.resume()
 
+    async def skip_song(self):
+        if self.voice_client is not None:
+            self.voice_client.stop()
+            try:
+                await self.play(self.playlist.next())
+            except ExhaustedException:
+                print("No more songs")
+
+    async def prev_song(self):
+        if self.voice_client is not None:
+            self.voice_client.stop()
+            try:
+                await self.play(self.playlist.prev())
+            except ExhaustedException:
+                print("No more songs")
+
     async def stop(self):
         if self.voice_client is not None:
             self.voice_client.stop()
+
+    async def clear_queue(self):
+        self.playlist.clear()
 
     async def set_volume(self, volume: int):
         if self.player is not None:
@@ -122,6 +152,18 @@ class ConsoleClient(discord.Client):
                 self.player.volume = volume
             else:
                 print("[WARNING] Invalid volume level!")
+
+    async def playlist_shuffle(self):
+        self.playlist.shuffle_mode()
+
+    async def playlist_loop(self):
+        self.playlist.loop_mode()
+
+    async def playlist_repeat(self):
+        self.playlist.repeat_mode()
+
+    async def playlist_default(self):
+        self.playlist.default_mode()
 
 
 def run(token: str, input_method: callable):
