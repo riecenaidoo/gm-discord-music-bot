@@ -25,7 +25,7 @@ class TestMusicQueue(unittest.TestCase):
         playlist.add("a")
         playlist.add("b")
         playlist.add("c")
-        playlist.loop()
+        playlist.loop_mode()
 
         self.assertEqual(playlist.next(), "a")
         self.assertEqual(playlist.next(), "b")
@@ -39,7 +39,7 @@ class TestMusicQueue(unittest.TestCase):
         playlist.add("a")
         playlist.add("b")
         playlist.add("c")
-        playlist.repeat()
+        playlist.repeat_mode()
 
         self.assertEqual(playlist.next(), "a")
         self.assertEqual(playlist.next(), "a")

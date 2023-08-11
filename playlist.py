@@ -59,16 +59,16 @@ class MusicQueue:
         # The last played song would have been appended to the end
         return self.recently_played.pop(len(self.recently_played) - 1)
 
-    def normal(self):
+    def default_mode(self):
         self.mode = PlaylistMode(PlaylistMode.SEQUENCE)
 
-    def shuffle(self):
+    def shuffle_mode(self):
         self.mode = PlaylistMode(PlaylistMode.SHUFFLE)
 
-    def loop(self):
+    def loop_mode(self):
         self.mode = PlaylistMode(PlaylistMode.LOOP)
 
-    def repeat(self):
+    def repeat_mode(self):
         self.mode = PlaylistMode(PlaylistMode.REPEAT)
 
     def clear(self):
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     p.add("c")
     p.add("d")
     p.add("e")
-    p.shuffle()
+    p.shuffle_mode()
     print(p.next())
     print(p.next())
     print(p.next())
