@@ -1,4 +1,5 @@
 """Discord bot functionality is handled by this module."""
+import asyncio
 from typing import Any
 
 import discord
@@ -6,6 +7,7 @@ from discord import Intents
 
 from YTDL import YTDLSource
 from console import Console, Command, VolumeCommand, PlayCommand, JoinChannelCommand
+from playlist import MusicQueue, ExhaustedException
 
 
 class ConsoleClient(discord.Client):
@@ -19,9 +21,10 @@ class ConsoleClient(discord.Client):
         self.voice_channels = []
         self.voice_client = None
         self.player = None
+        self.playlist = MusicQueue()
 
     def build_console(self):
-        self.console.add_command(PlayCommand("play", self.play_url))
+        self.console.add_command(PlayCommand("play", self.play_now))
         self.console.add_command(Command("pause", self.pause))
         self.console.add_command(Command("resume", self.resume))
         self.console.add_command(Command("stop", self.stop))
@@ -72,12 +75,32 @@ class ConsoleClient(discord.Client):
             await self.voice_client.disconnect()
             self.voice_client = None
 
-    async def play_url(self, url: str):
+    async def play_now(self, url: str):
+        """Immediately plays a song and overrides the queue based play system."""
         if self.voice_client is not None:
+            self.playlist.clear()
             self.voice_client.stop()
-            async with self.text_channels[len(self.text_channels) - 1].typing():
-                self.player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
-                self.voice_client.play(self.player, after=lambda e: print(f'Player error: {e}') if e else None)
+        await self.play(url)
+
+    async def play(self, url):
+        """Plays a YouTube URL"""
+        async with self.text_channels[len(self.text_channels) - 1].typing():
+            self.player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
+            self.voice_client.play(self.player,
+                                   after=lambda e: asyncio.run_coroutine_threadsafe(self.play_next(e),
+                                                                                    self.loop))
+
+    async def play_next(self, error):
+        """Callback function of bot#play which is used to play through the
+        songs in queue."""
+        if error:
+            print(f'Player error: {error}')
+        else:
+            try:
+                url = self.playlist.next()
+                await self.play(url)
+            except ExhaustedException:
+                print("No more songs.")
 
     async def pause(self):
         if self.voice_client is not None:
