@@ -31,7 +31,7 @@ class MusicQueue:
         elif self.mode == PlaylistMode.SHUFFLE:
             if len(self.playlist) <= 0:
                 raise ExhaustedException
-            i = random.randint(0, len(self.playlist))
+            i = random.randrange(0, len(self.playlist))
             song = self.playlist.pop(i)
             self.recently_played.append(song)
             return song
@@ -61,3 +61,18 @@ class MusicQueue:
 
 class ExhaustedException(Exception):
     pass
+
+
+if __name__ == '__main__':
+    # Manually confirming that #shuffle() works.
+    p = MusicQueue()
+    p.add("a")
+    p.add("b")
+    p.add("c")
+    p.add("d")
+    p.add("e")
+    p.shuffle()
+    print(p.next())
+    print(p.next())
+    print(p.next())
+    print(p.next())
