@@ -80,7 +80,7 @@ class ConsoleClient(discord.Client):
         if self.voice_client is not None:
             self.playlist.clear()
             self.voice_client.stop()
-        await self.play(url)
+            await self.play(url)
 
     async def play(self, url):
         """Plays a YouTube URL"""
