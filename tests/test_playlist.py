@@ -44,3 +44,21 @@ class TestMusicQueue(unittest.TestCase):
         self.assertEqual(playlist.next(), "a")
         self.assertEqual(playlist.next(), "a")
         self.assertEqual(playlist.next(), "a")
+
+    def test_prev(self):
+        playlist = MusicQueue()
+        playlist.add("a")
+        playlist.add("b")
+        playlist.add("c")
+        playlist.next()
+        playlist.next()
+        playlist.next()
+
+        self.assertEqual(playlist.prev(), "a")
+        self.assertEqual(playlist.prev(), "b")
+        self.assertEqual(playlist.prev(), "c")
+        try:
+            playlist.prev()
+            self.fail("Should throw an error!")
+        except ExhaustedException:
+            pass

@@ -48,6 +48,9 @@ class MusicQueue:
             return self.playlist[0]
 
     def prev(self) -> str:
+        if len(self.recently_played) <= 0:
+            raise ExhaustedException
+        # The last played song would have been appended to the end
         return self.recently_played.pop(len(self.recently_played) - 1)
 
     def normal(self):
