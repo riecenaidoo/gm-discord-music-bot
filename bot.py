@@ -41,7 +41,7 @@ class ConsoleClient(discord.Client):
         self.console.add_command(Command("shuffle", self.playlist_shuffle))
         self.console.add_command(Command("loop", self.playlist_loop))
         self.console.add_command(Command("repeat", self.playlist_repeat))
-        self.console.add_command(Command("start", self.start_playing()))
+        self.console.add_command(Command("start", self.start_playing))
 
     def load_voice_channels(self):
         for guild in self.guilds:
