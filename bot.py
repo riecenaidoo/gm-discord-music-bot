@@ -41,6 +41,7 @@ class ConsoleClient(discord.Client):
         self.console.add_command(Command("shuffle", self.playlist_shuffle))
         self.console.add_command(Command("loop", self.playlist_loop))
         self.console.add_command(Command("repeat", self.playlist_repeat))
+        self.console.add_command(Command("start", self.start_playing()))
 
     def load_voice_channels(self):
         for guild in self.guilds:
@@ -98,7 +99,7 @@ class ConsoleClient(discord.Client):
                                    after=lambda e: asyncio.run_coroutine_threadsafe(self.play_next(e),
                                                                                     self.loop))
 
-    async def play_next(self, error):
+    async def play_next(self, error=None):
         """Callback function of bot#play which is used to play through the
         songs in queue."""
         if error:
@@ -140,6 +141,10 @@ class ConsoleClient(discord.Client):
     async def stop(self):
         if self.voice_client is not None:
             self.voice_client.stop()
+
+    async def start_playing(self):
+        if self.voice_client is not None:
+            await self.play_next()
 
     async def clear_queue(self):
         self.playlist.clear()
