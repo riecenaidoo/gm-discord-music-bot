@@ -84,12 +84,12 @@ class ConsoleClient(discord.Client):
             await self.voice_client.disconnect()
             self.voice_client = None
 
-    async def play_now(self, url: str):
-        """Immediately plays a song and overrides the queue based play system."""
+    async def play_now(self, urls: list[str]):
+        """Overrides the queue with a new selection of songs, playing them immediately."""
         if self.voice_client is not None:
-            self.playlist.clear()
             self.voice_client.stop()
-            await self.play(url)
+            await self.queue(urls)
+            await self.start_playing()
 
     async def play(self, url):
         """Plays a YouTube URL"""
@@ -111,8 +111,9 @@ class ConsoleClient(discord.Client):
             except ExhaustedException:
                 print("No more songs.")
 
-    async def queue(self, url: str):
-        self.playlist.add(url)
+    async def queue(self, urls: list[str]):
+        for url in urls:
+            self.playlist.add(url)
 
     async def pause(self):
         if self.voice_client is not None:
