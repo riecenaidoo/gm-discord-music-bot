@@ -1,4 +1,4 @@
-# Virutal Environment
+# Virtual Environment
 .venv
 
 # IDE Configurations
@@ -7,3 +7,6 @@
 
 # Environment Configuration Data
 .env
+
+# Cache Files
+__pycache__

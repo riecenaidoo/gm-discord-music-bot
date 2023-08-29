@@ -151,7 +151,7 @@ class ConsoleClient(discord.Client):
         if self.player is not None:
             volume = float(volume)
             volume /= 100
-            if 0.0 < volume <= 1.0:
+            if 0.0 <= volume <= 1.0:
                 self.player.volume = volume
             else:
                 print("[WARNING] Invalid volume level!")
