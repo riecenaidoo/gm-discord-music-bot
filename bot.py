@@ -88,6 +88,7 @@ class ConsoleClient(discord.Client):
 
     async def play_now(self, urls: list[str]):
         """Overrides the queue with a new selection of songs, playing them immediately."""
+        self.playlist.clear()
         if self.voice_client is not None:
             self.voice_client.stop()
             await self.queue(urls)
