@@ -22,6 +22,7 @@ class ConsoleClient(discord.Client):
         self.voice_client = None
         self.player = None
         self.playlist = MusicQueue()
+        self.VOLUME = 0.5
 
     def build_console(self):
         self.console.add_command(PlayCommand("play", self.play_now))
@@ -42,6 +43,7 @@ class ConsoleClient(discord.Client):
         self.console.add_command(Command("loop", self.playlist_loop))
         self.console.add_command(Command("repeat", self.playlist_repeat))
         self.console.add_command(Command("start", self.start_playing))
+        self.console.add_command(Command("normal", self.playlist_normal))
 
     def load_voice_channels(self):
         for guild in self.guilds:
@@ -86,6 +88,7 @@ class ConsoleClient(discord.Client):
 
     async def play_now(self, urls: list[str]):
         """Overrides the queue with a new selection of songs, playing them immediately."""
+        self.playlist.clear()
         if self.voice_client is not None:
             self.voice_client.stop()
             await self.queue(urls)
@@ -95,6 +98,7 @@ class ConsoleClient(discord.Client):
         """Plays a YouTube URL"""
         async with self.text_channels[len(self.text_channels) - 1].typing():
             self.player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
+            self.player.volume = self.VOLUME
             self.voice_client.play(self.player,
                                    after=lambda e: asyncio.run_coroutine_threadsafe(self.play_next(e),
                                                                                     self.loop))
@@ -148,16 +152,20 @@ class ConsoleClient(discord.Client):
         self.playlist.clear()
 
     async def set_volume(self, volume: int):
-        if self.player is not None:
-            volume = float(volume)
-            volume /= 100
-            if 0.0 < volume <= 1.0:
-                self.player.volume = volume
-            else:
-                print("[WARNING] Invalid volume level!")
+        volume = float(volume)
+        volume /= 100
+        if 0.0 <= volume <= 1.0:
+            self.VOLUME = volume
+            if self.player is not None:
+                self.player.volume = self.VOLUME
+        else:
+            print("[WARNING] Invalid volume level!")
 
     async def playlist_shuffle(self):
         self.playlist.shuffle_mode()
+
+    async def playlist_normal(self):
+        self.playlist.default_mode()
 
     async def playlist_loop(self):
         self.playlist.loop_mode()
@@ -165,8 +173,6 @@ class ConsoleClient(discord.Client):
     async def playlist_repeat(self):
         self.playlist.repeat_mode()
 
-    async def playlist_default(self):
-        self.playlist.default_mode()
 
 
 def run(token: str, input_method: callable):
