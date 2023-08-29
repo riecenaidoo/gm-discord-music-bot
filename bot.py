@@ -43,6 +43,7 @@ class ConsoleClient(discord.Client):
         self.console.add_command(Command("loop", self.playlist_loop))
         self.console.add_command(Command("repeat", self.playlist_repeat))
         self.console.add_command(Command("start", self.start_playing))
+        self.console.add_command(Command("normal", self.playlist_normal))
 
     def load_voice_channels(self):
         for guild in self.guilds:
@@ -162,14 +163,15 @@ class ConsoleClient(discord.Client):
     async def playlist_shuffle(self):
         self.playlist.shuffle_mode()
 
+    async def playlist_normal(self):
+        self.playlist.default_mode()
+
     async def playlist_loop(self):
         self.playlist.loop_mode()
 
     async def playlist_repeat(self):
         self.playlist.repeat_mode()
 
-    async def playlist_default(self):
-        self.playlist.default_mode()
 
 
 def run(token: str, input_method: callable):
