@@ -162,36 +162,85 @@ class MusicClientAPI():
     def __init__(self, client:MusicClient, input_method:callable):
         self.CLIENT:MusicClient = client
         self.CONSOLE:Console = Console(input_method=input_method)
-        # self.build_console()
+        self.build_console()
 
-    def build_console(self):
-        self.CONSOLE.add_command(Command("quit", self.quit))
-
-        self.CONSOLE.add_command(Command("channels", self.get_channels))
-        self.CONSOLE.add_command(JoinChannelCommand("join", self.join_channel))
-        self.CONSOLE.add_command(Command("leave", self.leave_channel))
-
-        self.CONSOLE.add_command(PlayCommand("play", self.play))
-
-        self.CONSOLE.add_command(QueueCommand("queue", self.queue))
-        self.CONSOLE.add_command(Command("clear", self.clear_queue))
-        self.CONSOLE.add_command(Command("start", self.start_playing))
-        self.CONSOLE.add_command(Command("stop", self.stop_playing))
-        
-        self.CONSOLE.add_command(Command("pause", self.pause))
-        self.CONSOLE.add_command(Command("resume", self.resume))
-        self.CONSOLE.add_command(VolumeCommand("volume", self.set_volume))
-        
-        self.CONSOLE.add_command(Command("skip", self.skip_song))
-        self.CONSOLE.add_command(Command("prev", self.prev_song))
-        
-        self.CONSOLE.add_command(Command("shuffle", self.playlist_shuffle))
-        self.CONSOLE.add_command(Command("loop", self.playlist_loop))
-        self.CONSOLE.add_command(Command("repeat", self.playlist_repeat))
-        self.CONSOLE.add_command(Command("normal", self.playlist_normal))
-    
     async def activate(self):
         await self.CONSOLE.run()
+
+    def build_console(self):
+        # Primary Controls
+        self.CONSOLE.add_command(PlayCommand("play", self.play))
+        self.CONSOLE.add_command(Command("quit", self.quit))
+        # Voice Channel Controls
+        self.CONSOLE.add_command(Command("channels", self.get_voice_channels))
+        self.CONSOLE.add_command(JoinChannelCommand("join", self.voice_join))
+        self.CONSOLE.add_command(Command("leave", self.voice_leave))
+        # Audio Controls
+        self.CONSOLE.add_command(Command("pause", self.audio_pause))
+        self.CONSOLE.add_command(Command("resume", self.audio_resume))
+        self.CONSOLE.add_command(VolumeCommand("volume", self.audio_volume))
+        # Song Controls
+        self.CONSOLE.add_command(Command("skip", self.song_skip))
+        self.CONSOLE.add_command(Command("prev", self.song_prev))
+        # Playlist Controls
+        self.CONSOLE.add_command(QueueCommand("queue", self.playlist_queue))
+        self.CONSOLE.add_command(Command("clear", self.playlist_clear))
+        self.CONSOLE.add_command(Command("start", self.playlist_start))
+        self.CONSOLE.add_command(Command("stop", self.playlist_stop))
+        # Playlist Mode Controls
+        self.CONSOLE.add_command(Command("shuffle", self.playlist_mode_shuffle))
+        self.CONSOLE.add_command(Command("loop", self.playlist_mode_loop))
+        self.CONSOLE.add_command(Command("repeat", self.playlist_mode_repeat))
+        self.CONSOLE.add_command(Command("normal", self.playlist_mode_normal))
+
+    # Primary Controls
+    async def play(self):
+        pass
+    
+    async def quit(self):
+        pass
+    # Voice Channel Controls
+    async def get_voice_channels(self):
+        pass
+    
+    async def voice_join(self):
+        pass
+    
+    async def voice_leave(self):
+        pass
+    # Audio Controls
+    async def audio_pause(self):
+        pass
+    
+    async def audio_resume(self):
+        pass
+    
+    async def audio_volume(self):
+        pass
+    # Song Controls
+    async def song_skip(self):
+        pass
+    
+    async def song_prev(self):
+        pass
+    # Playlist Controls
+    async def playlist_queue(self):
+        pass
+    async def playlist_clear(self):
+        pass
+    async def playlist_start(self):
+        pass
+    async def playlist_stop(self):
+        pass
+    # Playlist Mode Controls
+    async def playlist_mode_shuffle(self):
+        pass
+    async def playlist_mode_loop(self):
+        pass
+    async def playlist_mode_repeat(self):
+        pass
+    async def playlist_mode_normal(self):
+        pass
 
 
 def run(token: str, input_method: callable):
