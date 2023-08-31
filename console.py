@@ -88,9 +88,8 @@ class IntArgCommand(Command):
 
 class Console:
 
-    def __init__(self, input_method: callable):
+    def __init__(self):
         self.COMMANDS:list[Command] = list()
-        self.GET_INPUT = to_thread(input_method)
         self.online:bool = True
 
     def add_command(self, command: Command):
@@ -120,13 +119,15 @@ class Console:
                 return
         print(f"Command '{args[0]}' is not supported.")
 
-    async def run(self):
+    async def start(self, input_method: callable):
         """Continously receives input and calls Commands
         as they are matched.
         """
+        
+        get_input = to_thread(input_method)
         while self.online:
             try:
-                command = await self.GET_INPUT()
+                command = await get_input()
                 await self.handle_command(command)
             except Command.UsageError as e:
                 print(f"Command {command[0].upper()} Usage Error: '{e.args[0]}'.")
