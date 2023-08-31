@@ -61,7 +61,7 @@ class MusicClient(discord.Client):
         else:
             try:
                 url = self.playlist.next()
-                await self.playlist_play(url)
+                await self.stream_youtube_url(url)
             except ExhaustedException:
                 print("No more songs.")
 
@@ -166,8 +166,11 @@ class MusicClient(discord.Client):
 
 def build_console(console:Console, client:MusicClient):    
     # Primary Controls
-    console.add_command(StringArgsCommand("play", client.playlist_play))
-    console.add_command(Command("quit", client.quit))
+    async def quit():
+        """Shuts down the Console and the Client."""
+        console.online = False
+        await client.quit()
+    console.add_command(Command("quit", quit))
     # Voice Channel Controls
     console.add_command(Command("channels", client.get_voice_channels))
     console.add_command(IntArgCommand("join", client.voice_join))
@@ -181,9 +184,10 @@ def build_console(console:Console, client:MusicClient):
     console.add_command(Command("prev", client.song_prev))
     # Playlist Controls
     console.add_command(StringArgsCommand("queue", client.playlist_queue))
-    console.add_command(Command("clear", client.playlist.clear))
     console.add_command(Command("start", client.playlist_start))
     console.add_command(Command("stop", client.playlist_stop))
+    console.add_command(Command("clear", client.playlist.clear))
+    console.add_command(StringArgsCommand("play", client.playlist_play))
     # Playlist Mode Controls
     console.add_command(Command("shuffle", client.playlist.shuffle_mode))
     console.add_command(Command("loop", client.playlist.loop_mode))

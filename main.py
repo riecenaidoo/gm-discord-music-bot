@@ -21,7 +21,7 @@ def run(token: str):
     console = bot.get_console(client)
     
     async def runner():
-        await asyncio.gather(client.start(token=token, reconnect=True),console.start(get_console_input))
+        await asyncio.gather(client.start(token=token, reconnect=True), console.start(get_console_input))
 
     try:
         asyncio.run(runner())
