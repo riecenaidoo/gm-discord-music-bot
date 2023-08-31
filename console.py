@@ -2,7 +2,7 @@
 import asyncio
 import functools
 import typing
-
+from inspect import iscoroutinefunction
 
 def to_thread(func: typing.Callable):
     @functools.wraps(func)
@@ -13,100 +13,121 @@ def to_thread(func: typing.Callable):
 
 
 class Command:
+    """Wraps a callable function under an alias. 
+    
+    Can be extended from to validate and pass arguments to the callable function.
+    """
 
-    def __init__(self, name_match: str, action_func: callable):
-        self.name_match = name_match.strip().casefold()
-        self.action_func = action_func
+    def __init__(self, alias: str, command_func: callable):
+        """Wraps a callable function under an alias.
+
+        Args:
+            alias (str): the string that will trigger a match for this Command.
+            command_func (callable): the function to be called when this Command is matched.
+        """
+        self.alias = alias.strip().casefold()
+        self.command_func = command_func
 
     def match(self, arg: str) -> bool:
-        return arg.strip().casefold() == self.name_match
+        """Checks whether this Command has been matched.
+
+        Args:
+            arg (str): The string to check against this Command's alias.
+
+        Returns:
+            bool: True if the arg matches this Command.
+        """
+        return arg.strip().casefold() == self.alias
 
     async def call(self, args: list[str]):
-        await self.action_func()
+        """Calls this Command's function. If the function is a coroutine, it will await it.
 
+        Args:
+            args (list[str]): Placeholder for arguments to be passed to a callable func. Used when call is overriden by inheritors.
+        """
+        if(iscoroutinefunction(self.command_func)):
+            await self.command_func()
+        else:
+            self.command_func()
 
-class PlayCommand(Command):
+    class UsageError(Exception):
+        """Raised by an extended Command if the additional arguments received
+        for the Command were invalid.
+        """
+        pass
 
-    async def call(self, args: list[str]):
-        if len(args) < 2:
-            raise UsageError(f"{self.name_match} expects an argument")
-
-        await self.action_func(args[1:])
-
-
-class VolumeCommand(Command):
-
-    async def call(self, args: list[str]):
-        if len(args) < 2:
-            raise UsageError(f"{self.name_match} expects an argument")
-
-        volume = args[1]
-
-        try:
-            volume = int(volume)
-        except ValueError:
-            raise UsageError(f"{self.name_match} argument must be integer")
-
-        if volume < 0 or volume > 100:
-            raise UsageError(f"{self.name_match} must be between 0 & 100")
-
-        await self.action_func(volume)
-
-
-class JoinChannelCommand(Command):
-
+class StringArgsCommand(Command):
+    """Extended Command that passes many string args to its callable function."""
     async def call(self, args: list[str]):
         if len(args) < 2:
-            raise UsageError(f"{self.name_match} expects an argument")
+            raise self.UsageError(f"Expects atleast one argument")
+
+        if(iscoroutinefunction(self.command_func)):
+            await self.command_func(args[1:])
+        else:
+            self.command_func(args[1:])
+
+class IntArgCommand(Command):
+    """Extended Command that passes an Integer argument to its callable function."""
+    async def call(self, args: list[str]):
+        if len(args) != 2:
+            raise self.UsageError(f"Expects one argument")
 
         index = args[1]
 
         try:
             index = int(index)
         except ValueError:
-            raise UsageError(f"{self.name_match} argument must be integer")
-
-        if index < 0:
-            raise UsageError(f"{self.name_match} must be index (greater than 0)")
-
-        await self.action_func(index)
-
-
-class QueueCommand(Command):
-
-    async def call(self, args: list[str]):
-        if len(args) < 2:
-            raise UsageError(f"{self.name_match} expects an argument")
-
-        await self.action_func(args[1:])
-
+            raise self.UsageError(f"Argument must be an Integer")
+        
+        if(iscoroutinefunction(self.command_func)):
+            await self.command_func(index)
+        else:
+            self.command_func(index)
+        
 
 class Console:
 
     def __init__(self, input_method: callable):
-        self.commands = list()
-        self.input_method = to_thread(input_method)
-        self.online = True
+        self.COMMANDS:list[Command] = list()
+        self.GET_INPUT = to_thread(input_method)
+        self.online:bool = True
 
     def add_command(self, command: Command):
-        self.commands.append(command)
+        """Adds a Command this Console can support matching against.
+        
+        To prevent duplication, this method will not add a Command 
+        if its alias matches an existing Command in this Console.
+        
+        Args:
+            command (Command): Command to add.
+        """
+        for cmd in self.COMMANDS:
+            if cmd.match(command.alias):
+                print(f"Console already has a Command with the alias '{command.alias}'.")
+                return
+        self.COMMANDS.append(command)
 
     async def handle_command(self, args: list[str]):
-        for cmd in self.commands:
+        """Calls the appropriate Command from this Console, if any.
+
+        Args:
+            args (list[str]): A list of arguments for the Command, where args[0] is the alias of the Command requested.
+        """
+        for cmd in self.COMMANDS:
             if cmd.match(args[0]):
                 await cmd.call(args)
-                break
-        else:
-            print("No match")
+                return
+        print(f"Command '{args[0]}' is not supported.")
 
     async def run(self):
+        """Continously receives input and calls Commands
+        as they are matched.
+        """
         while self.online:
             try:
-                user_in = await self.input_method()
-                await self.handle_command(user_in)
-            except UsageError as e:
-                print(f"Usage Error: {e.args[0]}")
+                command = await self.GET_INPUT()
+                await self.handle_command(command)
+            except Command.UsageError as e:
+                print(f"Command {command[0].upper()} Usage Error: '{e.args[0]}'.")
 
-
-class UsageError(Exception):
-    pass

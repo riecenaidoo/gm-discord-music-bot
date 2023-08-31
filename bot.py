@@ -6,7 +6,7 @@ import discord
 from discord import Intents 
 
 from YTDL import YTDLSource
-from console import Console, Command, VolumeCommand, PlayCommand, JoinChannelCommand, QueueCommand
+from console import Console, Command, StringArgsCommand, IntArgCommand
 from playlist import MusicQueue, ExhaustedException
 
 
@@ -42,7 +42,7 @@ class MusicClient(discord.Client):
         await self.leave_channel()
         await self.close()
 
-    async def get_voice_channels(self):
+    def get_voice_channels(self):
         for index, channel in enumerate(self.voice_channels):
             print(f"[{index}] - {channel}")
 
@@ -61,6 +61,21 @@ class MusicClient(discord.Client):
             self.voice_client.stop()
             await self.voice_client.disconnect()
             self.voice_client = None
+
+    async def play_now(self, urls: list[str]):
+        """Overrides the queue with a new selection of songs, playing them immediately."""
+
+        self.clear_queue()
+        self.queue(urls)
+        
+        if self.voice_client is None:
+            return
+        
+        if self.voice_client.is_playing():
+            self.voice_client.stop()    # Stops current AudioSource & play_next() callback triggers.
+            return
+        
+        await self.start_playing()
 
     async def play(self, url):
         """Plays a YouTube URL"""
@@ -83,23 +98,23 @@ class MusicClient(discord.Client):
             except ExhaustedException:
                 print("No more songs.")
 
-    async def queue(self, urls: list[str]):
+    def queue(self, urls: list[str]):
         for url in urls:
             self.playlist.add(url)
 
-    async def pause(self):
+    def pause(self):
         if self.voice_client is not None:
             self.voice_client.pause()
 
-    async def resume(self):
+    def resume(self):
         if self.voice_client is not None:
             self.voice_client.resume()
 
-    async def skip_song(self):
+    def skip_song(self):
         if self.voice_client is not None:
             self.voice_client.stop()
 
-    async def prev_song(self):
+    def prev_song(self):
         if self.voice_client is not None:
             try:
                 self.playlist.add_first(self.playlist.prev())
@@ -107,19 +122,19 @@ class MusicClient(discord.Client):
             except ExhaustedException:
                 print("No more songs")
 
-    async def stop(self):
+    def stop(self):
         if self.voice_client is not None:
-            await self.clear_queue()
+            self.clear_queue()
             self.voice_client.stop()
 
     async def start_playing(self):
         if self.voice_client is not None:
             await self.play_next()
 
-    async def clear_queue(self):
+    def clear_queue(self):
         self.playlist.clear()
 
-    async def set_volume(self, volume: int):
+    def set_volume(self, volume: int):
         volume = float(volume)
         volume /= 100
         if 0.0 <= volume <= 1.0:
@@ -142,21 +157,21 @@ class MusicClientAPI():
 
     def build_console(self):
         # Primary Controls
-        self.CONSOLE.add_command(PlayCommand("play", self.play))
+        self.CONSOLE.add_command(StringArgsCommand("play", self.play))
         self.CONSOLE.add_command(Command("quit", self.quit))
         # Voice Channel Controls
         self.CONSOLE.add_command(Command("channels", self.get_voice_channels))
-        self.CONSOLE.add_command(JoinChannelCommand("join", self.voice_join))
+        self.CONSOLE.add_command(IntArgCommand("join", self.voice_join))
         self.CONSOLE.add_command(Command("leave", self.voice_leave))
         # Audio Controls
         self.CONSOLE.add_command(Command("pause", self.audio_pause))
         self.CONSOLE.add_command(Command("resume", self.audio_resume))
-        self.CONSOLE.add_command(VolumeCommand("volume", self.audio_volume))
+        self.CONSOLE.add_command(IntArgCommand("volume", self.audio_volume))
         # Song Controls
         self.CONSOLE.add_command(Command("skip", self.song_skip))
         self.CONSOLE.add_command(Command("prev", self.song_prev))
         # Playlist Controls
-        self.CONSOLE.add_command(QueueCommand("queue", self.playlist_queue))
+        self.CONSOLE.add_command(StringArgsCommand("queue", self.playlist_queue))
         self.CONSOLE.add_command(Command("clear", self.playlist_clear))
         self.CONSOLE.add_command(Command("start", self.playlist_start))
         self.CONSOLE.add_command(Command("stop", self.playlist_stop))
