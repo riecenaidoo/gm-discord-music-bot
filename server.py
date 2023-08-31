@@ -1,5 +1,5 @@
 import socket
-from console import Console
+from console import Console, to_thread
 
 
 class Server:
@@ -69,7 +69,7 @@ class WebSocketConsole:
     async def start(self):
         while self.CONSOLE.online:
             print("WebSocket Open...")
-            self.SERVER.connect()
+            await to_thread(self.SERVER.connect())
             try:
                 print("WebSocket Connected...")
                 await self.CONSOLE.start(self.get_socket_input)
