@@ -162,7 +162,7 @@ class MusicClientAPI():
     def __init__(self, client:MusicClient, input_method:callable):
         self.CLIENT:MusicClient = client
         self.CONSOLE:Console = Console(input_method=input_method)
-        self.build_console()
+        # self.build_console()
 
     def build_console(self):
         self.CONSOLE.add_command(Command("quit", self.quit))
@@ -202,8 +202,7 @@ def run(token: str, input_method: callable):
     api = MusicClientAPI(client=client,input_method=input_method)
     
     async def runner():
-        client.run()
-        await client.start(reconnect=True)
+        await client.start(token=token, reconnect=True)
         await api.activate()
 
     try:
