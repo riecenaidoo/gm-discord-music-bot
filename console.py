@@ -50,62 +50,41 @@ class Command:
         else:
             self.command_func()
 
+    class UsageError(Exception):
+        """Raised by an extended Command if the additional arguments received
+        for the Command were invalid.
+        """
+        pass
 
-class PlayCommand(Command):
-
+class StringArgsCommand(Command):
+    """Overriden Command that passes many string args to its callable function."""
     async def call(self, args: list[str]):
         if len(args) < 2:
-            raise UsageError(f"{self.alias} expects an argument")
+            raise self.UsageError(f"{self.alias} expects an argument")
 
-        await self.command_func(args[1:])
+        if(iscoroutinefunction(self.command_func)):
+            await self.command_func(args[1:])
+        else:
+            self.command_func(args[1:])
 
-
-class VolumeCommand(Command):
-
+class IntArgCommand(Command):
+    """Overriden Command that passes an Integer argument to its callable function."""
     async def call(self, args: list[str]):
         if len(args) < 2:
-            raise UsageError(f"{self.alias} expects an argument")
-
-        volume = args[1]
-
-        try:
-            volume = int(volume)
-        except ValueError:
-            raise UsageError(f"{self.alias} argument must be integer")
-
-        if volume < 0 or volume > 100:
-            raise UsageError(f"{self.alias} must be between 0 & 100")
-
-        self.command_func(volume)
-
-
-class JoinChannelCommand(Command):
-
-    async def call(self, args: list[str]):
-        if len(args) < 2:
-            raise UsageError(f"{self.alias} expects an argument")
+            raise self.UsageError(f"{self.alias} expects an argument")
 
         index = args[1]
 
         try:
             index = int(index)
         except ValueError:
-            raise UsageError(f"{self.alias} argument must be integer")
-
-        if index < 0:
-            raise UsageError(f"{self.alias} must be index (greater than 0)")
-
-        await self.command_func(index)
-
-
-class QueueCommand(Command):
-
-    async def call(self, args: list[str]):
-        if len(args) < 2:
-            raise UsageError(f"{self.alias} expects an argument")
-
-        self.command_func(args[1:])
-
+            raise self.UsageError(f"{self.alias} argument must be integer")
+        
+        if(iscoroutinefunction(self.command_func)):
+            await self.command_func(index)
+        else:
+            self.command_func(index)
+        
 
 class Console:
 
@@ -130,9 +109,6 @@ class Console:
             try:
                 user_in = await self.input_method()
                 await self.handle_command(user_in)
-            except UsageError as e:
+            except Command.UsageError as e:
                 print(f"Usage Error: {e.args[0]}")
 
-
-class UsageError(Exception):
-    pass

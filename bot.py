@@ -6,7 +6,7 @@ import discord
 from discord import Intents
 
 from YTDL import YTDLSource
-from console import Console, Command, VolumeCommand, PlayCommand, JoinChannelCommand, QueueCommand
+from console import Console, Command, StringArgsCommand, IntArgCommand
 from playlist import MusicQueue, ExhaustedException
 
 
@@ -25,17 +25,17 @@ class ConsoleClient(discord.Client):
         self.VOLUME = 0.5
 
     def build_console(self):
-        self.console.add_command(PlayCommand("play", self.play_now))
+        self.console.add_command(StringArgsCommand("play", self.play_now))
         self.console.add_command(Command("pause", self.pause))
         self.console.add_command(Command("resume", self.resume))
         self.console.add_command(Command("stop", self.stop))
-        self.console.add_command(VolumeCommand("volume", self.set_volume))
+        self.console.add_command(IntArgCommand("volume", self.set_volume))
         self.console.add_command(Command("channels", self.get_voice_channels))
-        self.console.add_command(JoinChannelCommand("join", self.join_channel))
+        self.console.add_command(IntArgCommand("join", self.join_channel))
         self.console.add_command(Command("leave", self.leave_channel))
         self.console.add_command(Command("quit", self.quit))
         # Enhanced Commands
-        self.console.add_command(QueueCommand("queue", self.queue))
+        self.console.add_command(StringArgsCommand("queue", self.queue))
         self.console.add_command(Command("clear", self.clear_queue))
         self.console.add_command(Command("skip", self.skip_song))
         self.console.add_command(Command("prev", self.prev_song))
