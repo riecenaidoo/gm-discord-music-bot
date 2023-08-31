@@ -10,40 +10,17 @@ from console import Console, Command, VolumeCommand, PlayCommand, JoinChannelCom
 from playlist import MusicQueue, ExhaustedException
 
 
-class ConsoleClient(discord.Client):
+class MusicClient(discord.Client):
     """A Discord Client that is controllable by the host via a Console."""
 
-    def __init__(self, *, input_method: callable, intents: Intents, **options: Any):
+    def __init__(self, *, intents: Intents, **options: Any):
         super().__init__(intents=intents, **options)
-        self.console = Console(input_method=input_method)
-        self.build_console()
         self.text_channels = []
         self.voice_channels = []
         self.voice_client = None
         self.player = None
         self.playlist = MusicQueue()
         self.VOLUME = 0.5
-
-    def build_console(self):
-        self.console.add_command(PlayCommand("play", self.play_now))
-        self.console.add_command(Command("pause", self.pause))
-        self.console.add_command(Command("resume", self.resume))
-        self.console.add_command(Command("stop", self.stop))
-        self.console.add_command(VolumeCommand("volume", self.set_volume))
-        self.console.add_command(Command("channels", self.get_voice_channels))
-        self.console.add_command(JoinChannelCommand("join", self.join_channel))
-        self.console.add_command(Command("leave", self.leave_channel))
-        self.console.add_command(Command("quit", self.quit))
-        # Enhanced Commands
-        self.console.add_command(QueueCommand("queue", self.queue))
-        self.console.add_command(Command("clear", self.clear_queue))
-        self.console.add_command(Command("skip", self.skip_song))
-        self.console.add_command(Command("prev", self.prev_song))
-        self.console.add_command(Command("shuffle", self.playlist_shuffle))
-        self.console.add_command(Command("loop", self.playlist_loop))
-        self.console.add_command(Command("repeat", self.playlist_repeat))
-        self.console.add_command(Command("start", self.start_playing))
-        self.console.add_command(Command("normal", self.playlist_normal))
 
     def load_voice_channels(self):
         for guild in self.guilds:
@@ -58,7 +35,6 @@ class ConsoleClient(discord.Client):
     async def on_ready(self):
         self.load_voice_channels()
         self.load_text_channels()
-        await self.console.run()
 
     async def quit(self):
         print("[INFO] Shutting down...")
@@ -181,10 +157,60 @@ class ConsoleClient(discord.Client):
         self.playlist.repeat_mode()
 
 
+class MusicClientAPI():
+    
+    def __init__(self, client:MusicClient, input_method:callable):
+        self.CLIENT:MusicClient = client
+        self.CONSOLE:Console = Console(input_method=input_method)
+        self.build_console()
+
+    def build_console(self):
+        self.CONSOLE.add_command(Command("quit", self.quit))
+
+        self.CONSOLE.add_command(Command("channels", self.get_channels))
+        self.CONSOLE.add_command(JoinChannelCommand("join", self.join_channel))
+        self.CONSOLE.add_command(Command("leave", self.leave_channel))
+
+        self.CONSOLE.add_command(PlayCommand("play", self.play))
+
+        self.CONSOLE.add_command(QueueCommand("queue", self.queue))
+        self.CONSOLE.add_command(Command("clear", self.clear_queue))
+        self.CONSOLE.add_command(Command("start", self.start_playing))
+        self.CONSOLE.add_command(Command("stop", self.stop_playing))
+        
+        self.CONSOLE.add_command(Command("pause", self.pause))
+        self.CONSOLE.add_command(Command("resume", self.resume))
+        self.CONSOLE.add_command(VolumeCommand("volume", self.set_volume))
+        
+        self.CONSOLE.add_command(Command("skip", self.skip_song))
+        self.CONSOLE.add_command(Command("prev", self.prev_song))
+        
+        self.CONSOLE.add_command(Command("shuffle", self.playlist_shuffle))
+        self.CONSOLE.add_command(Command("loop", self.playlist_loop))
+        self.CONSOLE.add_command(Command("repeat", self.playlist_repeat))
+        self.CONSOLE.add_command(Command("normal", self.playlist_normal))
+    
+    async def activate(self):
+        await self.CONSOLE.run()
+
 
 def run(token: str, input_method: callable):
     intents = discord.Intents.default()
     intents.message_content = True
 
-    client = ConsoleClient(intents=intents, input_method=input_method)
-    client.run(token)
+    client = MusicClient(intents=intents)
+    api = MusicClientAPI(client=client,input_method=input_method)
+    
+    async def runner():
+        client.run()
+        await client.start(reconnect=True)
+        await api.activate()
+
+    try:
+        asyncio.run(runner())
+    except KeyboardInterrupt:
+        # nothing to do here
+        # `asyncio.run` handles the loop cleanup
+        # and `self.start` closes all sockets and the HTTPClient instance.
+        return
+    
