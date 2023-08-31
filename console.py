@@ -13,75 +13,98 @@ def to_thread(func: typing.Callable):
 
 
 class Command:
+    """Wraps a callable function under an alias. 
+    
+    Can be extended from to validate and pass arguments to the callable function.
+    """
 
-    def __init__(self, name_match: str, action_func: callable):
-        self.name_match = name_match.strip().casefold()
-        self.action_func = action_func
+    def __init__(self, alias: str, command_func: callable):
+        """Wraps a callable function under an alias.
+
+        Args:
+            alias (str): the string that will trigger a match for this Command.
+            command_func (callable): the function to be called when this Command is matched.
+        """
+        self.alias = alias.strip().casefold()
+        self.command_func = command_func
 
     def match(self, arg: str) -> bool:
-        return arg.strip().casefold() == self.name_match
+        """Checks whether this Command has been matched.
+
+        Args:
+            arg (str): The string to check against this Command's alias.
+
+        Returns:
+            bool: True if the arg matches this Command.
+        """
+        return arg.strip().casefold() == self.alias
 
     async def call(self, args: list[str]):
-        if(iscoroutinefunction(self.action_func)):
-            await self.action_func()
+        """Calls this Command's function. If the function is a coroutine, it will await it.
+
+        Args:
+            args (list[str]): Placeholder for arguments to be passed to a callable func. Used when call is overriden by inheritors.
+        """
+        if(iscoroutinefunction(self.command_func)):
+            await self.command_func()
         else:
-            self.action_func()
+            self.command_func()
 
 
 class PlayCommand(Command):
 
     async def call(self, args: list[str]):
         if len(args) < 2:
-            raise UsageError(f"{self.name_match} expects an argument")
+            raise UsageError(f"{self.alias} expects an argument")
 
-        await self.action_func(args[1:])
+        await self.command_func(args[1:])
 
 
 class VolumeCommand(Command):
 
     async def call(self, args: list[str]):
         if len(args) < 2:
-            raise UsageError(f"{self.name_match} expects an argument")
+            raise UsageError(f"{self.alias} expects an argument")
 
         volume = args[1]
 
         try:
             volume = int(volume)
         except ValueError:
-            raise UsageError(f"{self.name_match} argument must be integer")
+            raise UsageError(f"{self.alias} argument must be integer")
 
         if volume < 0 or volume > 100:
-            raise UsageError(f"{self.name_match} must be between 0 & 100")
+            raise UsageError(f"{self.alias} must be between 0 & 100")
 
-        self.action_func(volume)
+        self.command_func(volume)
 
 
 class JoinChannelCommand(Command):
 
     async def call(self, args: list[str]):
         if len(args) < 2:
-            raise UsageError(f"{self.name_match} expects an argument")
+            raise UsageError(f"{self.alias} expects an argument")
 
         index = args[1]
 
         try:
             index = int(index)
         except ValueError:
-            raise UsageError(f"{self.name_match} argument must be integer")
+            raise UsageError(f"{self.alias} argument must be integer")
 
         if index < 0:
-            raise UsageError(f"{self.name_match} must be index (greater than 0)")
+            raise UsageError(f"{self.alias} must be index (greater than 0)")
 
-        await self.action_func(index)
+        await self.command_func(index)
 
 
 class QueueCommand(Command):
 
     async def call(self, args: list[str]):
         if len(args) < 2:
-            raise UsageError(f"{self.name_match} expects an argument")
+            raise UsageError(f"{self.alias} expects an argument")
 
-        self.action_func(args[1:])
+        self.command_func(args[1:])
 
 
 class Console:
