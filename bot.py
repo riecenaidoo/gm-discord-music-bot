@@ -183,13 +183,6 @@ def __build_console_commands(console:Console, client:MusicClient):
         console (Console): Console to add Commands to.
         client (MusicClient): MusicClient this Console should control. 
     """
-      
-    # Primary Controls
-    async def quit():
-        """Shuts down the Console and the Client."""
-        console.online = False
-        await client.quit()
-    console.add_command(Command("quit", quit))
     # Voice Channel Controls
     console.add_command(Command("channels", client.get_voice_channels))
     console.add_command(IntArgCommand("join", client.voice_join))
