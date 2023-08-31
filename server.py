@@ -14,8 +14,10 @@ class Server:
     class ConnectionBrokenException(Exception):
         pass
 
+    @to_thread
     def connect(self):
         (self.client_socket, self.address) = self.server_socket.accept()
+
 
     def disconnect(self):
         self.server_socket.shutdown(socket.SHUT_RDWR)
@@ -69,12 +71,16 @@ class WebSocketConsole:
     async def start(self):
         while self.CONSOLE.online:
             print("WebSocket Open...")
-            await to_thread(self.SERVER.connect())
             try:
+                await self.SERVER.connect()
                 print("WebSocket Connected...")
-                await self.CONSOLE.start(self.get_socket_input)
-            except Server.ConnectionBrokenException:
-                print("WebSocket broken.")
+                try:
+                    await self.CONSOLE.start(self.get_socket_input)
+                except Server.ConnectionBrokenException:
+                    print("WebSocket broken.")
+            except OSError:
+                print("Socket waiting for connection was interupted.")
+
     
     def stop(self):
         self.SERVER.disconnect()
