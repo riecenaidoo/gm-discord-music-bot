@@ -17,11 +17,12 @@ def run(token: str):
     """Blocking. Starts the MusicClient bot and its console interface."""
     
     discord.utils.setup_logging()
-    client = bot.get_client()
-    console = bot.get_console(client)
+    client = bot.build_client()
+    console = bot.build_console(client)
     
     async def runner():
-        await asyncio.gather(client.start(token=token, reconnect=True), console.start(get_console_input))
+        await asyncio.gather(client.start(token=token, reconnect=True), 
+                             console.start(get_console_input))
 
     try:
         asyncio.run(runner())

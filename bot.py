@@ -164,7 +164,26 @@ class MusicClient(discord.Client):
                 print("No more songs")
 
 
-def build_console(console:Console, client:MusicClient):    
+def build_client() -> MusicClient:
+    """Builds a MusicClient with necessary correct discord intents.
+
+    Returns:
+        MusicClient: MusicClient that can be started with `.start(token=token)`.
+    """
+    
+    intents = discord.Intents.default()
+    intents.message_content = True
+    return MusicClient(intents=intents)
+
+
+def __build_console_commands(console:Console, client:MusicClient): 
+    """Builds the Commands to control a MusicClient to this Console.
+
+    Args:
+        console (Console): Console to add Commands to.
+        client (MusicClient): MusicClient this Console should control. 
+    """
+      
     # Primary Controls
     async def quit():
         """Shuts down the Console and the Client."""
@@ -194,12 +213,16 @@ def build_console(console:Console, client:MusicClient):
     console.add_command(Command("repeat", client.playlist.repeat_mode))
     console.add_command(Command("normal", client.playlist.default_mode))
 
-def get_client() -> MusicClient:
-    intents = discord.Intents.default()
-    intents.message_content = True
-    return MusicClient(intents=intents)
 
-def get_console(client:MusicClient) -> Console:
+def build_console(client:MusicClient) -> Console:
+    """Builds a Console for this MusicClient.
+
+    Args:
+        client (MusicClient): MusicClient for this Console to control.
+
+    Returns:
+        Console: Console that can control this MusicClient.
+    """
     console = Console()
-    build_console(console, client)
+    __build_console_commands(console, client)
     return console
