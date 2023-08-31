@@ -88,11 +88,18 @@ class ConsoleClient(discord.Client):
 
     async def play_now(self, urls: list[str]):
         """Overrides the queue with a new selection of songs, playing them immediately."""
-        self.playlist.clear()
-        if self.voice_client is not None:
-            self.voice_client.stop()
-            await self.queue(urls)
-            await self.start_playing()
+
+        await self.clear_queue()
+        await self.queue(urls)
+        
+        if self.voice_client is None:
+            return
+        
+        if self.voice_client.is_playing():
+            self.voice_client.stop()    # Stops current AudioSource & play_next() callback triggers.
+            return
+        
+        await self.start_playing()
 
     async def play(self, url):
         """Plays a YouTube URL"""
