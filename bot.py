@@ -3,7 +3,7 @@ import asyncio
 from typing import Any
 
 import discord
-from discord import Intents
+from discord import Intents 
 
 from YTDL import YTDLSource
 from console import Console, Command, VolumeCommand, PlayCommand, JoinChannelCommand, QueueCommand
@@ -202,6 +202,7 @@ def run(token: str, input_method: callable):
     api = MusicClientAPI(client=client,input_method=input_method)
     
     async def runner():
+        discord.utils.setup_logging()
         await client.start(token=token, reconnect=True)
         await api.activate()
 
