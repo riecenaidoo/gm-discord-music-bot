@@ -53,7 +53,7 @@ class VolumeCommand(Command):
         if volume < 0 or volume > 100:
             raise UsageError(f"{self.name_match} must be between 0 & 100")
 
-        await self.action_func(volume)
+        self.action_func(volume)
 
 
 class JoinChannelCommand(Command):
@@ -81,7 +81,7 @@ class QueueCommand(Command):
         if len(args) < 2:
             raise UsageError(f"{self.name_match} expects an argument")
 
-        await self.action_func(args[1:])
+        self.action_func(args[1:])
 
 
 class Console:
