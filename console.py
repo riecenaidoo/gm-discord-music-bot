@@ -57,7 +57,7 @@ class Command:
         pass
 
 class StringArgsCommand(Command):
-    """Overriden Command that passes many string args to its callable function."""
+    """Extended Command that passes many string args to its callable function."""
     async def call(self, args: list[str]):
         if len(args) < 2:
             raise self.UsageError(f"Expects atleast one argument")
@@ -68,7 +68,7 @@ class StringArgsCommand(Command):
             self.command_func(args[1:])
 
 class IntArgCommand(Command):
-    """Overriden Command that passes an Integer argument to its callable function."""
+    """Extended Command that passes an Integer argument to its callable function."""
     async def call(self, args: list[str]):
         if len(args) != 2:
             raise self.UsageError(f"Expects one argument")
