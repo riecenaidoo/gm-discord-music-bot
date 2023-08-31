@@ -62,21 +62,6 @@ class MusicClient(discord.Client):
             await self.voice_client.disconnect()
             self.voice_client = None
 
-    async def play_now(self, urls: list[str]):
-        """Overrides the queue with a new selection of songs, playing them immediately."""
-
-        await self.clear_queue()
-        await self.queue(urls)
-        
-        if self.voice_client is None:
-            return
-        
-        if self.voice_client.is_playing():
-            self.voice_client.stop()    # Stops current AudioSource & play_next() callback triggers.
-            return
-        
-        await self.start_playing()
-
     async def play(self, url):
         """Plays a YouTube URL"""
         async with self.text_channels[len(self.text_channels) - 1].typing():
@@ -143,18 +128,6 @@ class MusicClient(discord.Client):
                 self.player.volume = self.VOLUME
         else:
             print("[WARNING] Invalid volume level!")
-
-    async def playlist_shuffle(self):
-        self.playlist.shuffle_mode()
-
-    async def playlist_normal(self):
-        self.playlist.default_mode()
-
-    async def playlist_loop(self):
-        self.playlist.loop_mode()
-
-    async def playlist_repeat(self):
-        self.playlist.repeat_mode()
 
 
 class MusicClientAPI():
@@ -234,13 +207,16 @@ class MusicClientAPI():
         pass
     # Playlist Mode Controls
     async def playlist_mode_shuffle(self):
-        pass
+        self.CLIENT.playlist.shuffle_mode()
+        
     async def playlist_mode_loop(self):
-        pass
+        self.CLIENT.playlist.loop_mode()
+        
     async def playlist_mode_repeat(self):
-        pass
+        self.CLIENT.playlist.repeat_mode()
+        
     async def playlist_mode_normal(self):
-        pass
+        self.CLIENT.playlist.default_mode()
 
 
 def run(token: str, input_method: callable):
