@@ -21,8 +21,7 @@ def run(token: str):
     console = bot.get_console(client)
     
     async def runner():
-        await client.start(token=token, reconnect=True)
-        await console.start(get_console_input)
+        await asyncio.gather(client.start(token=token, reconnect=True),console.start(get_console_input))
 
     try:
         asyncio.run(runner())
@@ -40,3 +39,5 @@ if __name__ == "__main__":
 
     dotenv.load_dotenv()
     run(token=os.environ["DISCORD_BOT_TOKEN"])
+
+discord.Client.run

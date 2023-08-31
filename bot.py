@@ -40,7 +40,7 @@ class MusicClient(discord.Client):
         """Stops the MusicClient and shuts it down."""
         
         print("Shutting down...")
-        await self.leave_channel()
+        await self.voice_leave()
         await self.close()
 
     # Audio Streaming Logic
