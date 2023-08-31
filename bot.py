@@ -66,7 +66,7 @@ class ConsoleClient(discord.Client):
         await self.leave_channel()
         await self.close()
 
-    async def get_voice_channels(self):
+    def get_voice_channels(self):
         for index, channel in enumerate(self.voice_channels):
             print(f"[{index}] - {channel}")
 
@@ -89,8 +89,8 @@ class ConsoleClient(discord.Client):
     async def play_now(self, urls: list[str]):
         """Overrides the queue with a new selection of songs, playing them immediately."""
 
-        await self.clear_queue()
-        await self.queue(urls)
+        self.clear_queue()
+        self.queue(urls)
         
         if self.voice_client is None:
             return
@@ -122,23 +122,23 @@ class ConsoleClient(discord.Client):
             except ExhaustedException:
                 print("No more songs.")
 
-    async def queue(self, urls: list[str]):
+    def queue(self, urls: list[str]):
         for url in urls:
             self.playlist.add(url)
 
-    async def pause(self):
+    def pause(self):
         if self.voice_client is not None:
             self.voice_client.pause()
 
-    async def resume(self):
+    def resume(self):
         if self.voice_client is not None:
             self.voice_client.resume()
 
-    async def skip_song(self):
+    def skip_song(self):
         if self.voice_client is not None:
             self.voice_client.stop()
 
-    async def prev_song(self):
+    def prev_song(self):
         if self.voice_client is not None:
             try:
                 self.playlist.add_first(self.playlist.prev())
@@ -146,19 +146,19 @@ class ConsoleClient(discord.Client):
             except ExhaustedException:
                 print("No more songs")
 
-    async def stop(self):
+    def stop(self):
         if self.voice_client is not None:
-            await self.clear_queue()
+            self.clear_queue()
             self.voice_client.stop()
 
     async def start_playing(self):
         if self.voice_client is not None:
             await self.play_next()
 
-    async def clear_queue(self):
+    def clear_queue(self):
         self.playlist.clear()
 
-    async def set_volume(self, volume: int):
+    def set_volume(self, volume: int):
         volume = float(volume)
         volume /= 100
         if 0.0 <= volume <= 1.0:
@@ -168,16 +168,16 @@ class ConsoleClient(discord.Client):
         else:
             print("[WARNING] Invalid volume level!")
 
-    async def playlist_shuffle(self):
+    def playlist_shuffle(self):
         self.playlist.shuffle_mode()
 
-    async def playlist_normal(self):
+    def playlist_normal(self):
         self.playlist.default_mode()
 
-    async def playlist_loop(self):
+    def playlist_loop(self):
         self.playlist.loop_mode()
 
-    async def playlist_repeat(self):
+    def playlist_repeat(self):
         self.playlist.repeat_mode()
 
 

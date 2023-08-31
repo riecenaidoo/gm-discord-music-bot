@@ -2,7 +2,7 @@
 import asyncio
 import functools
 import typing
-
+from inspect import iscoroutinefunction
 
 def to_thread(func: typing.Callable):
     @functools.wraps(func)
@@ -22,7 +22,10 @@ class Command:
         return arg.strip().casefold() == self.name_match
 
     async def call(self, args: list[str]):
-        await self.action_func()
+        if(iscoroutinefunction(self.action_func)):
+            await self.action_func()
+        else:
+            self.action_func()
 
 
 class PlayCommand(Command):
