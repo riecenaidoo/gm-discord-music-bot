@@ -60,7 +60,7 @@ class StringArgsCommand(Command):
     """Overriden Command that passes many string args to its callable function."""
     async def call(self, args: list[str]):
         if len(args) < 2:
-            raise self.UsageError(f"{self.alias} expects an argument")
+            raise self.UsageError(f"Expects atleast one argument")
 
         if(iscoroutinefunction(self.command_func)):
             await self.command_func(args[1:])
@@ -70,15 +70,15 @@ class StringArgsCommand(Command):
 class IntArgCommand(Command):
     """Overriden Command that passes an Integer argument to its callable function."""
     async def call(self, args: list[str]):
-        if len(args) < 2:
-            raise self.UsageError(f"{self.alias} expects an argument")
+        if len(args) != 2:
+            raise self.UsageError(f"Expects one argument")
 
         index = args[1]
 
         try:
             index = int(index)
         except ValueError:
-            raise self.UsageError(f"{self.alias} argument must be integer")
+            raise self.UsageError(f"Argument must be an Integer")
         
         if(iscoroutinefunction(self.command_func)):
             await self.command_func(index)
@@ -89,26 +89,45 @@ class IntArgCommand(Command):
 class Console:
 
     def __init__(self, input_method: callable):
-        self.commands = list()
-        self.input_method = to_thread(input_method)
-        self.online = True
+        self.COMMANDS:list[Command] = list()
+        self.GET_INPUT = to_thread(input_method)
+        self.online:bool = True
 
     def add_command(self, command: Command):
-        self.commands.append(command)
+        """Adds a Command this Console can support matching against.
+        
+        To prevent duplication, this method will not add a Command 
+        if its alias matches an existing Command in this Console.
+        
+        Args:
+            command (Command): Command to add.
+        """
+        for cmd in self.COMMANDS:
+            if cmd.match(command.alias):
+                print(f"Console already has a Command with the alias '{command.alias}'.")
+                return
+        self.COMMANDS.append(command)
 
     async def handle_command(self, args: list[str]):
-        for cmd in self.commands:
+        """Calls the appropriate Command from this Console, if any.
+
+        Args:
+            args (list[str]): A list of arguments for the Command, where args[0] is the alias of the Command requested.
+        """
+        for cmd in self.COMMANDS:
             if cmd.match(args[0]):
                 await cmd.call(args)
-                break
-        else:
-            print("No match")
+                return
+        print(f"Command '{args[0]}' is not supported.")
 
     async def run(self):
+        """Continously receives input and calls Commands
+        as they are matched.
+        """
         while self.online:
             try:
-                user_in = await self.input_method()
-                await self.handle_command(user_in)
+                command = await self.GET_INPUT()
+                await self.handle_command(command)
             except Command.UsageError as e:
-                print(f"Usage Error: {e.args[0]}")
+                print(f"Command {command[0].upper()} Usage Error: '{e.args[0]}'.")
 
