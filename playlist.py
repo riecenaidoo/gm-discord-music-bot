@@ -1,81 +1,77 @@
 """Tools for managing the playlist of the bot."""
 
 import random
-from enum import Enum
-
-
-class PlaylistMode(Enum):
-    SEQUENCE = 0
-    SHUFFLE = 1
-    LOOP = 2
-    REPEAT = 3
 
 
 class MusicQueue:
 
     def __init__(self):
-        self.playlist = list()
-        self.recently_played = list()
-        self.mode = PlaylistMode(PlaylistMode.SEQUENCE)
+        self.queue:list = list()
+        self.current = None
+        self.recently_played:list = list()
+
+        self.shuffle:bool = False
+        self.repeat:bool = False
+        self.loop:bool = False
 
     def add(self, url: str):
-        self.playlist.append(url)
+        self.queue.append(url)
 
     def add_first(self, url: str):
-        self.playlist.insert(0, url)
+        self.queue.insert(0, url)
+        
+    def pop(self, index:int):        
+        song_url:str = self.queue.pop(index)
+        if self.loop:
+            self.queue.append(song_url)
+        if self.current != None:
+            self.recently_played.append(self.current)    
+        self.current = song_url
+        return song_url
 
     def next(self) -> str:
         """
         throws: ExhaustedException if there is no next element.
         """
-        if self.mode == PlaylistMode.SEQUENCE:
-            if len(self.playlist) <= 0:
-                raise ExhaustedException
-            song = self.playlist.pop(0)
-            self.recently_played.append(song)
-            return song
-        elif self.mode == PlaylistMode.SHUFFLE:
-            if len(self.playlist) <= 0:
-                raise ExhaustedException
-            i = random.randrange(0, len(self.playlist))
-            song = self.playlist.pop(i)
-            self.recently_played.append(song)
-            return song
-        elif self.mode == PlaylistMode.LOOP:
-            if len(self.playlist) <= 0:
-                for song in self.recently_played:
-                    self.playlist.append(song)
-                self.recently_played.clear()
-            song = self.playlist.pop(0)
-            self.recently_played.append(song)
-            return song
-
-        elif self.mode == PlaylistMode.REPEAT:
-            return self.playlist[0]
+        
+        if self.repeat:
+            return self.current
+        
+        if (len(self.queue)) <= 0:
+            raise ExhaustedException
+        
+        if self.shuffle:
+            song_index = random.randrange(0, len(self.queue))
+            return self.pop(song_index)
+        
+        return self.pop(0)
 
     def prev(self) -> str:
         """
         throws: ExhaustedException if there is no prev element.
         """
-        if len(self.recently_played) <= 1:
+        if len(self.recently_played) <= 0:
             raise ExhaustedException
-        # The currently playing song is the last element, so we must go one before
-        return self.recently_played.pop(len(self.recently_played) - 2)
+        
+        return self.recently_played.pop(0)
 
     def default_mode(self):
-        self.mode = PlaylistMode(PlaylistMode.SEQUENCE)
+        self.shuffle = False
+        self.loop = False
+        self.repeat = False
 
     def shuffle_mode(self):
-        self.mode = PlaylistMode(PlaylistMode.SHUFFLE)
+        self.shuffle = not self.shuffle
 
     def loop_mode(self):
-        self.mode = PlaylistMode(PlaylistMode.LOOP)
+        self.loop = not self.loop
 
     def repeat_mode(self):
-        self.mode = PlaylistMode(PlaylistMode.REPEAT)
+        self.repeat = not self.repeat
 
     def clear(self):
-        self.playlist.clear()
+        self.queue.clear()
+        self.current = None
         self.recently_played.clear()
 
 
