@@ -8,6 +8,7 @@ from discord import Intents
 from YTDL import YTDLSource
 from console import Console, Command, StringArgsCommand, IntArgCommand
 from playlist import MusicQueue, ExhaustedException
+from async_timeout import timeout
 
 
 class MusicClient(discord.Client):
@@ -46,7 +47,7 @@ class MusicClient(discord.Client):
     # Audio Streaming Logic
     async def stream_youtube_url(self, url):
         """Plays a YouTube URL"""
-        async with self.text_channels[len(self.text_channels) - 1].typing():
+        async with timeout(10):
             self.player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
             self.player.volume = self.VOLUME
             self.voice_client.play(self.player,
