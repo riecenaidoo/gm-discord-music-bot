@@ -7,7 +7,7 @@ class MusicQueue:
 
     def __init__(self):
         self.song_queue:list = list()
-        self.current = None
+        self.current_song = None
         self.recently_played_stack:list = list()
 
         self.shuffle:bool = False
@@ -24,14 +24,25 @@ class MusicQueue:
         
         self.song_queue.insert(index,url)
 
-    def pop(self, index:int):        
+    def pop(self, index:int = 0) -> str:    
+        """Removes and returns an element from the Playlist.
+        
+        Sets `current_song` to the removed element.
+        Pushes the removed element to `recently_played_stack`.
+
+        Args:
+            index (int, optional): Song Index to remove. Defaults to 0.
+
+        Returns:
+            str: Song url string.
+        """ 
         
         song_url:str = self.song_queue.pop(index)
         if self.loop:
             self.song_queue.append(song_url)
-        if self.current != None:
-            self.recently_played_stack.append(self.current)    
-        self.current = song_url
+        if self.current_song != None:
+            self.recently_played_stack.append(self.current_song)    
+        self.current_song = song_url
         return song_url
 
     def next(self) -> str:
@@ -40,16 +51,16 @@ class MusicQueue:
         """
         
         if self.repeat:
-            return self.current
+            return self.current_song
         
         if (len(self.song_queue)) <= 0:
             raise ExhaustedException
         
         if self.shuffle:
-            song_index = random.randrange(0, len(self.song_queue))
-            return self.pop(song_index)
+            rand_song_index = random.randrange(0, len(self.song_queue))
+            return self.pop(rand_song_index)
         
-        return self.pop(0)
+        return self.pop()
 
     def prev(self) -> str:
         """
@@ -93,7 +104,7 @@ class MusicQueue:
         """Removes all songs from the Playlist.
         """
         self.song_queue.clear()
-        self.current = None
+        self.current_song = None
         self.recently_played_stack.clear()
 
 
