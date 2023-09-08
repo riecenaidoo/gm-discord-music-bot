@@ -25,6 +25,7 @@ class MusicQueue:
         self.song_queue.insert(index,url)
 
     def pop(self, index:int):        
+        
         song_url:str = self.song_queue.pop(index)
         if self.loop:
             self.song_queue.append(song_url)
@@ -54,6 +55,7 @@ class MusicQueue:
         """
         throws: ExhaustedException if there is no prev element.
         """
+        
         if len(self.recently_played_stack) <= 0:
             raise ExhaustedException
         
@@ -62,6 +64,7 @@ class MusicQueue:
     def default_mode(self):
         """Set playlist to default mode. Pops songs off in sequence.
         """
+        
         self.shuffle = False
         self.loop = False
         self.repeat = False
@@ -75,6 +78,7 @@ class MusicQueue:
         """Toggles loop all mode. Looping will append songs to the queue after they are popped off.
         Will unset repeat mode if it was enabled.
         """
+        
         self.loop = not self.loop
         
         if self.loop and self.repeat:
