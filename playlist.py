@@ -14,12 +14,16 @@ class MusicQueue:
         self.repeat:bool = False
         self.loop:bool = False
 
-    def add(self, url: str):
-        self.queue.append(url)
-
-    def add_first(self, url: str):
-        self.queue.insert(0, url)
+    def add(self, url: str, index: int = 0):
+        """Add a song to the playlist's queue.
         
+        Args:
+            url (str): URL of the song to add to the Playlist.
+            index (int, optional): Index to add the Song URL at. Defaults to 0.
+        """
+        
+        self.queue.insert(index,url)
+
     def pop(self, index:int):        
         song_url:str = self.queue.pop(index)
         if self.loop:

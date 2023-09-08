@@ -159,7 +159,7 @@ class MusicClient(discord.Client):
         
         if self.voice_client is not None:
             try:
-                self.playlist.add_first(self.playlist.prev())
+                self.playlist.add(url= self.playlist.prev(), index= 0)
                 self.voice_client.stop()
             except ExhaustedException:
                 print("No more songs")
