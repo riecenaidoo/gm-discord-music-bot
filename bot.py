@@ -7,7 +7,7 @@ from discord import Intents
 
 from YTDL import YTDLSource
 from console import Console, Command, StringArgsCommand, IntArgCommand
-from playlist import MusicQueue, ExhaustedException
+from playlist import Playlist
 from async_timeout import timeout
 
 
@@ -20,7 +20,7 @@ class MusicClient(discord.Client):
         self.voice_channels = []
         self.voice_client = None
         self.player = None
-        self.playlist = MusicQueue()
+        self.playlist = Playlist()
         self.VOLUME = 0.5
 
     def load_voice_channels(self):
@@ -63,7 +63,7 @@ class MusicClient(discord.Client):
             try:
                 url = self.playlist.next()
                 await self.stream_youtube_url(url)
-            except ExhaustedException:
+            except Playlist.ExhaustedException:
                 print("No more songs.")
 
     # Voice Channel Controls
@@ -161,7 +161,7 @@ class MusicClient(discord.Client):
             try:
                 self.playlist.add(url= self.playlist.prev(), index= 0)
                 self.voice_client.stop()
-            except ExhaustedException:
+            except Playlist.ExhaustedException:
                 print("No more songs")
 
 
