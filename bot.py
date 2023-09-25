@@ -151,19 +151,22 @@ class MusicClient(discord.Client):
         self.VOLUME = volume
 
     # Song Controls
-    def song_skip(self):
+    async def song_skip(self):
         """Play the next song in the playlist."""
         
         if self.voice_client is not None:
-            self.voice_client.stop()
+            if self.voice_client.is_playing():
+                self.voice_client.stop()    # Triggers the callback fn 'stream_next'
+            else:
+                await self.stream_next()
 
-    def song_prev(self):
+    async def song_prev(self):
         """Play the previous song in the playlist."""
         
         if self.voice_client is not None:
             try:
                 self.playlist.add(url= self.playlist.prev(), index= 0)
-                self.voice_client.stop()
+                await self.song_skip()
             except Playlist.ExhaustedException:
                 print("No more songs")
 
