@@ -40,7 +40,10 @@ class YTDLSource(discord.PCMVolumeTransformer):
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(executor=None, func=lambda: cls.ytdl.extract_info(url, download=not stream))
+        try:
+            data = await loop.run_in_executor(executor=None, func=lambda: cls.ytdl.extract_info(url, download=not stream))
+        except Exception as e:
+            return None # Catch any download/stream error.
 
         if 'entries' in data:
             # take first item from a playlist

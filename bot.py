@@ -49,10 +49,13 @@ class MusicClient(discord.Client):
         """Plays a YouTube URL"""
         async with timeout(10):
             self.player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
-            self.player.volume = self.VOLUME
-            self.voice_client.play(self.player,
-                                   after=lambda e: asyncio.run_coroutine_threadsafe(self.stream_next(e),
-                                                                                    self.loop))
+            if self.player:
+                self.player.volume = self.VOLUME
+                self.voice_client.play(self.player,
+                                    after=lambda e: asyncio.run_coroutine_threadsafe(self.stream_next(e),
+                                                                                        self.loop))
+            else:   # Skip to the next song if the AudioSource yielded nothing.
+                await self.stream_next()
 
     async def stream_next(self, error=None):
         """Callback function of bot#play which is used to play through the
