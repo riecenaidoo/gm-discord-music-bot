@@ -63,7 +63,8 @@ class Playlist:
 
         - `shuffle`: pop a random song from `song_queue`.
         - `loop`:  pop a song from `song_queue` and append it back to the queue.
-        - `repeat`: always return `current_song`, ignore the `song_queue`.
+        - `repeat`: always return `current_song`, ignore the `song_queue`. If no
+        'current_song' pop one from `song_queue`.
 
         Raises:
             ExhaustedException: if there is no next song in `song_queue`.
@@ -73,7 +74,11 @@ class Playlist:
         """
 
         if self.repeat:
+            if not self.current_song:
+                self.current_song = self._pop()
+            
             return self.current_song
+            
 
         if (len(self.song_queue)) <= 0:
             raise self.ExhaustedException
