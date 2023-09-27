@@ -1,5 +1,13 @@
 import socket
 from console import Console, to_thread
+import logging
+import utils
+
+
+
+_log = logging.getLogger(__name__)
+_log.addHandler(utils.HANDLER)
+_log.setLevel(logging.INFO)
 
 
 class Server:
@@ -70,16 +78,16 @@ class WebSocketConsole:
 
     async def start(self):
         while self.CONSOLE.online:
-            print("WebSocket Open...")
+            _log.debug("WebSocket Open...")
             try:
                 await self.SERVER.connect()
-                print("WebSocket Connected...")
+                _log.info("WebSocket Connected!")
                 try:
                     await self.CONSOLE.start(self.get_socket_input)
                 except Server.ConnectionBrokenException:
-                    print("WebSocket broken.")
+                    _log.info("WebSocket Disconnected!")
             except OSError:
-                print("Socket waiting for connection was interupted.")
+                _log.debug("Socket waiting for connection was interupted.")
 
     
     def stop(self):

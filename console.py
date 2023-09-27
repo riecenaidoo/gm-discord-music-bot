@@ -3,6 +3,15 @@ import asyncio
 import functools
 import typing
 from inspect import iscoroutinefunction
+import logging
+import utils
+
+
+
+_log = logging.getLogger(__name__)
+_log.addHandler(utils.HANDLER)
+_log.setLevel(logging.WARNING)
+
 
 def to_thread(func: typing.Callable):
     @functools.wraps(func)
@@ -103,7 +112,7 @@ class Console:
         """
         for cmd in self.COMMANDS:
             if cmd.match(command.alias):
-                print(f"Console already has a Command with the alias '{command.alias}'.")
+                _log.warning(f"Console already has a Command with the alias '{command.alias}'.")
                 return
         self.COMMANDS.append(command)
 
@@ -117,7 +126,7 @@ class Console:
             if cmd.match(args[0]):
                 await cmd.call(args)
                 return
-        print(f"Command '{args[0]}' is not supported.")
+        _log.warning(f"Command '{args[0]}' is not supported.")
 
     async def start(self, input_method: callable):
         """Continously receives input and calls Commands
@@ -130,5 +139,5 @@ class Console:
                 command = await get_input()
                 await self.handle_command(command)
             except Command.UsageError as e:
-                print(f"Command {command[0].upper()} Usage Error: '{e.args[0]}'.")
+                _log.warning(f"Command {command[0].upper()} Usage Error: '{e.args[0]}'.")
 
