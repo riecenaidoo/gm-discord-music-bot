@@ -62,7 +62,8 @@ class MusicClient(discord.Client):
         """Stops the MusicClient and shuts it down."""
         
         _log.info("Shutting down the MusicClient")
-        await self.voice_leave()
+        if self.voice_client:
+            await self.voice_leave()
         await self.close()
 
     # Audio Streaming Logic
@@ -153,13 +154,7 @@ class MusicClient(discord.Client):
 
         self.playlist_clear()
         self.playlist_queue(urls)
-        
-        _log.info("Playing requested songs.")
-        if self.voice_client.is_playing():
-            self.voice_client.stop()    # Stops current AudioSource & play_next() callback triggers.
-            return
-        
-        await self.stream_next()        
+        await self.song_skip()      
 
     # Audio Controls
     @__requires_voice_connected
