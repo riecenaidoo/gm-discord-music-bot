@@ -12,7 +12,7 @@ from async_timeout import timeout
 
 import logging
 import utils
-
+from inspect import iscoroutinefunction
 
 
 _log = logging.getLogger(__name__)
@@ -31,6 +31,23 @@ class MusicClient(discord.Client):
         self.player = None
         self.playlist = Playlist()
         self.VOLUME = 0.5
+
+    def __requires_voice_connected(func):
+        def validator(self, *args, **kwargs):
+            if self.voice_client is not None:
+                return func(self, *args, **kwargs)
+            else:
+                _log.warning(f"{func.__name__} requires the Bot to be in a Voice Channel.")   
+                
+        async def async_validator(self, *args, **kwargs):
+            if self.voice_client is not None:
+                return await func(self, *args, **kwargs)
+            else:
+                _log.warning(f"{func.__name__} requires the Bot to be in a Voice Channel.")  
+                             
+        if iscoroutinefunction(func):
+            return async_validator
+        return validator
 
     def load_voice_channels(self):
         for guild in self.guilds:
@@ -125,6 +142,7 @@ class MusicClient(discord.Client):
             self.voice_client.stop()
             _log.info("Stopped and cleared the playlist.")
 
+    @__requires_voice_connected
     async def playlist_play(self, urls: list[str]):
         """Overrides the Playlist with new songs, playing them"""
 
