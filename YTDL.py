@@ -51,7 +51,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         try:
             data = await loop.run_in_executor(executor=None, func=lambda: cls.ytdl.extract_info(url, download=not stream))
         except Exception as e:
-            _log(f"YTDL extraction failed: {e.args[0]}")
+            _log.error(f"YTDL extraction failed: {e.args[0]}")
             return None # Catch any download/stream error.
 
         if 'entries' in data:

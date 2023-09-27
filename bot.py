@@ -142,10 +142,16 @@ class MusicClient(discord.Client):
         self.voice_client.stop()
         _log.info("Stopped and cleared the playlist.")
 
+    def playlist_clear(self):
+        """Clears the playlist."""
+        
+        self.playlist.clear()
+        _log.info("Cleared playlist.")
+
     async def playlist_play(self, urls: list[str]):
         """Overrides the Playlist with new songs, playing them"""
 
-        self.playlist.clear()
+        self.playlist_clear()
         self.playlist_queue(urls)
         
         _log.info("Playing requested songs.")
@@ -176,15 +182,15 @@ class MusicClient(discord.Client):
         volume = float(volume)
         volume /= 100
         if not (0.0 <= volume <= 1.0):
-            _log.warn(f"Ignoring request to set volume_level(0-100) to invalid level of '{volume}'.")
+            _log.warn(f"Ignoring request to set volume_level(0-100) to invalid level of '{volume*100}'.")
             return
         
         if self.player is not None:
             self.player.volume = volume
-            _log.info("Adjusted active player's volume.")
+            _log.debug("Adjusted active player's volume.")
                
         self.VOLUME = volume
-        _log.info(f"Set bot's volume level to {volume}.")
+        _log.info(f"Set bot's volume level to {volume*100}.")
 
     # Song Controls
     @__requires_voice_connected
@@ -244,7 +250,7 @@ def __build_console_commands(console:Console, client:MusicClient):
     console.add_command(StringArgsCommand("queue", client.playlist_queue))
     console.add_command(Command("start", client.playlist_start))
     console.add_command(Command("stop", client.playlist_stop))
-    console.add_command(Command("clear", client.playlist.clear))
+    console.add_command(Command("clear", client.playlist_clear))
     console.add_command(StringArgsCommand("play", client.playlist_play))
     # Playlist Mode Controls
     console.add_command(Command("shuffle", client.playlist.shuffle_mode))
