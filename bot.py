@@ -10,6 +10,15 @@ from console import Console, Command, StringArgsCommand, IntArgCommand
 from playlist import Playlist
 from async_timeout import timeout
 
+import logging
+import utils
+
+
+
+_log = logging.getLogger(__name__)
+_log.addHandler(utils.HANDLER)
+_log.setLevel(logging.INFO)
+
 
 class MusicClient(discord.Client):
     """A Discord Client that is controllable by the host via a Console."""
@@ -36,11 +45,12 @@ class MusicClient(discord.Client):
     async def on_ready(self):
         self.load_voice_channels()
         self.load_text_channels()
+        _log.info("MusicClient is ready for Console Commands.")
 
     async def quit(self):
         """Stops the MusicClient and shuts it down."""
         
-        print("Shutting down...")
+        _log.info("Shutting down the MusicClient")
         await self.voice_leave()
         await self.close()
 
@@ -50,31 +60,35 @@ class MusicClient(discord.Client):
         async with timeout(10):
             self.player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
             if self.player:
+                _log.info(f"Now Playing {self.player.title}")
                 self.player.volume = self.VOLUME
                 self.voice_client.play(self.player,
                                     after=lambda e: asyncio.run_coroutine_threadsafe(self.stream_next(e),
                                                                                         self.loop))
             else:   # Skip to the next song if the AudioSource yielded nothing.
+                _log.warning(f"Skipping Bad URL '{url}'.")
                 await self.stream_next()
 
     async def stream_next(self, error=None):
         """Callback function of bot#play which is used to play through the
         songs in queue."""
         if error:
-            print(f'Player error: {error}')
+            _log.error(f'Player error: {error}')
         else:
             try:
                 url = self.playlist.next()
                 await self.stream_youtube_url(url)
             except Playlist.ExhaustedException:
-                print("No more songs.")
+                _log.info("Playlist exhausted.")
 
     # Voice Channel Controls
     def get_voice_channels(self):
+        _log.info("Retrieving voice channels")
         for index, channel in enumerate(self.voice_channels):
             print(f"[{index}] - {channel}")
 
     async def voice_join(self, channel_index: int):
+        _log.info("Joining voice channel.")
         if self.voice_client is not None:
             await self.voice_client.move_to(self.voice_channels[channel_index])
             return
@@ -82,24 +96,26 @@ class MusicClient(discord.Client):
         if (channel_index >= 0) and (channel_index < len(self.voice_channels)):
             self.voice_client = await discord.VoiceChannel.connect(self.voice_channels[channel_index])
         else:
-            print("[WARNING] Invalid channel index!")
+            _log.warn(f"Invalid channel index '{channel_index}'. Current voice channels available: {len(self.voice_channels)}.")
 
     async def voice_leave(self):
         if self.voice_client is not None:
-            self.voice_client.stop()
             await self.voice_client.disconnect()
             self.voice_client = None
-
+            _log.info("Disconnected from voice channel.")
+ 
     # Playlist Controls
     def playlist_queue(self, urls: list[str]):
         """Add songs to the playlist."""
         for url in urls:
             self.playlist.add(url)
+        _log.info("Added songs to queue.")
 
     async def playlist_start(self):
         """Starts the playlist."""
         if self.voice_client is not None:
             await self.stream_next()
+            _log.info("Starting playlist.")
 
     def playlist_stop(self):
         """Stops the playlist."""
@@ -107,6 +123,7 @@ class MusicClient(discord.Client):
         if self.voice_client is not None:
             self.playlist.clear()
             self.voice_client.stop()
+            _log.info("Stopped and cleared the playlist.")
 
     async def playlist_play(self, urls: list[str]):
         """Overrides the Playlist with new songs, playing them"""
@@ -115,13 +132,15 @@ class MusicClient(discord.Client):
         self.playlist_queue(urls)
         
         if self.voice_client is None:
+            _log.warning("Cannot start playing. Not connected to a voice channel.")
             return
         
         if self.voice_client.is_playing():
             self.voice_client.stop()    # Stops current AudioSource & play_next() callback triggers.
             return
         
-        await self.stream_next()
+        _log.info("Playing requested songs.")
+        await self.stream_next()        
 
 
     # Audio Controls
@@ -130,12 +149,14 @@ class MusicClient(discord.Client):
         
         if self.voice_client is not None:
             self.voice_client.pause()
+            _log.info("Paused the audio.")
 
     def audio_resume(self):
         """Resumes the audio streaming."""
         
         if self.voice_client is not None:
             self.voice_client.resume()
+            _log.info("Resumed the audio.")
 
     def set_audio_volume(self, volume: int):
         """Set the MusicClient's audio volume level."""
@@ -143,12 +164,14 @@ class MusicClient(discord.Client):
         volume = float(volume)
         volume /= 100
         if not (0.0 <= volume <= 1.0):
-            print("[WARNING] Invalid volume level!")
+            _log.warn(f"Ignoring request to set volume_level(0-100) to invalid level of '{volume}'.")
             return
         
         if self.player is not None:
-            self.player.volume = volume    
+            self.player.volume = volume
+            _log.info("Adjusted active player's volume.")   
         self.VOLUME = volume
+        _log.info(f"Set bot's volume level to {volume}.")
 
     # Song Controls
     async def song_skip(self):
@@ -156,8 +179,10 @@ class MusicClient(discord.Client):
         
         if self.voice_client is not None:
             if self.voice_client.is_playing():
+                _log.info("Skipped current song.")
                 self.voice_client.stop()    # Triggers the callback fn 'stream_next'
             else:
+                _log.info("Playing next song.")
                 await self.stream_next()
 
     async def song_prev(self):
@@ -166,9 +191,10 @@ class MusicClient(discord.Client):
         if self.voice_client is not None:
             try:
                 self.playlist.add(url= self.playlist.prev(), index= 0)
+                _log.info("Playing previous song.")
                 await self.song_skip()
             except Playlist.ExhaustedException:
-                print("No more songs")
+                _log.warning("No previous song. Playlist's RecentlyPlayed list is empty.")
 
 
 def build_client() -> MusicClient:

@@ -5,11 +5,13 @@ import bot
 import dotenv
 import server
 from console import Command
+import logging
+import utils
 
 def get_console_input() -> list[str]:
     instruction = ""
     while len(instruction) == 0:
-        instruction = input(" > ")
+        instruction = input()
 
     return instruction.split(" ")
 
@@ -17,7 +19,7 @@ def get_console_input() -> list[str]:
 def run(token: str, hostname, port: int):
     """Blocking. Starts the MusicClient bot and its console interface."""
     
-    discord.utils.setup_logging()
+    discord.utils.setup_logging(handler=utils.HANDLER, formatter=utils.FORMATTER, level=logging.WARNING, root=False)
     client = bot.build_client()
     console = bot.build_console(client)
     web_console = server.WebSocketConsole(console=console, hostname=hostname, port=port)

@@ -4,6 +4,14 @@ import asyncio
 
 import discord
 import youtube_dl
+import logging
+import utils
+
+
+
+_log = logging.getLogger(__name__)
+_log.addHandler(utils.HANDLER)
+_log.setLevel(logging.ERROR)
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -43,6 +51,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         try:
             data = await loop.run_in_executor(executor=None, func=lambda: cls.ytdl.extract_info(url, download=not stream))
         except Exception as e:
+            _log(f"YTDL extraction failed: {e.args[0]}")
             return None # Catch any download/stream error.
 
         if 'entries' in data:
