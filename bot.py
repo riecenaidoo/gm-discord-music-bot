@@ -7,7 +7,7 @@ from discord import Intents
 
 from YTDL import YTDLSource
 from console import Console, Command, StringArgsCommand, IntArgCommand
-from playlist import MusicQueue, ExhaustedException
+from playlist import Playlist
 from async_timeout import timeout
 
 
@@ -20,7 +20,7 @@ class MusicClient(discord.Client):
         self.voice_channels = []
         self.voice_client = None
         self.player = None
-        self.playlist = MusicQueue()
+        self.playlist = Playlist()
         self.VOLUME = 0.5
 
     def load_voice_channels(self):
@@ -49,10 +49,13 @@ class MusicClient(discord.Client):
         """Plays a YouTube URL"""
         async with timeout(10):
             self.player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
-            self.player.volume = self.VOLUME
-            self.voice_client.play(self.player,
-                                   after=lambda e: asyncio.run_coroutine_threadsafe(self.stream_next(e),
-                                                                                    self.loop))
+            if self.player:
+                self.player.volume = self.VOLUME
+                self.voice_client.play(self.player,
+                                    after=lambda e: asyncio.run_coroutine_threadsafe(self.stream_next(e),
+                                                                                        self.loop))
+            else:   # Skip to the next song if the AudioSource yielded nothing.
+                await self.stream_next()
 
     async def stream_next(self, error=None):
         """Callback function of bot#play which is used to play through the
@@ -63,7 +66,7 @@ class MusicClient(discord.Client):
             try:
                 url = self.playlist.next()
                 await self.stream_youtube_url(url)
-            except ExhaustedException:
+            except Playlist.ExhaustedException:
                 print("No more songs.")
 
     # Voice Channel Controls
@@ -148,20 +151,23 @@ class MusicClient(discord.Client):
         self.VOLUME = volume
 
     # Song Controls
-    def song_skip(self):
+    async def song_skip(self):
         """Play the next song in the playlist."""
         
         if self.voice_client is not None:
-            self.voice_client.stop()
+            if self.voice_client.is_playing():
+                self.voice_client.stop()    # Triggers the callback fn 'stream_next'
+            else:
+                await self.stream_next()
 
-    def song_prev(self):
+    async def song_prev(self):
         """Play the previous song in the playlist."""
         
         if self.voice_client is not None:
             try:
-                self.playlist.add_first(self.playlist.prev())
-                self.voice_client.stop()
-            except ExhaustedException:
+                self.playlist.add(url= self.playlist.prev(), index= 0)
+                await self.song_skip()
+            except Playlist.ExhaustedException:
                 print("No more songs")
 
 

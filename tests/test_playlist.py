@@ -1,12 +1,12 @@
 import unittest
 
-from playlist import MusicQueue, ExhaustedException
+from playlist import Playlist
 
 
 class TestMusicQueue(unittest.TestCase):
 
     def test_normal_next(self):
-        playlist = MusicQueue()
+        playlist = Playlist()
         playlist.add("a")
         playlist.add("b")
         playlist.add("c")
@@ -17,11 +17,11 @@ class TestMusicQueue(unittest.TestCase):
         try:
             playlist.next()
             self.fail("Should throw an error!")
-        except ExhaustedException:
+        except Playlist.ExhaustedException:
             pass
 
     def test_loop_next(self):
-        playlist = MusicQueue()
+        playlist = Playlist()
         playlist.add("a")
         playlist.add("b")
         playlist.add("c")
@@ -35,7 +35,7 @@ class TestMusicQueue(unittest.TestCase):
         self.assertEqual(playlist.next(), "c")
 
     def test_repeat_next(self):
-        playlist = MusicQueue()
+        playlist = Playlist()
         playlist.add("a")
         playlist.add("b")
         playlist.add("c")
@@ -46,14 +46,15 @@ class TestMusicQueue(unittest.TestCase):
         self.assertEqual(playlist.next(), "a")
 
     def test_prev(self):
-        playlist = MusicQueue()
+        playlist = Playlist()
         playlist.add("a")
         playlist.add("b")
         playlist.next()  # Playing a
         try:
             playlist.prev()
-            self.fail("Should throw an error! There is no previous song. 'a' is currently playing!")
-        except ExhaustedException:
+            self.fail(
+                "Should throw an error! There is no previous song. 'a' is currently playing!")
+        except Playlist.ExhaustedException:
             pass
 
         playlist.next()  # Playing b
@@ -61,6 +62,7 @@ class TestMusicQueue(unittest.TestCase):
 
         try:
             playlist.prev()
-            self.fail("Should throw an error! There is no previous song before 'a'.")
-        except ExhaustedException:
+            self.fail(
+                "Should throw an error! There is no previous song before 'a'.")
+        except Playlist.ExhaustedException:
             pass
