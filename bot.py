@@ -10,6 +10,15 @@ from console import Console, Command, StringArgsCommand, IntArgCommand
 from playlist import Playlist
 from async_timeout import timeout
 
+import logging
+import utils
+
+
+
+_log = logging.getLogger(__name__)
+_log.addHandler(utils.HANDLER)
+_log.setLevel(logging.INFO)
+
 
 class MusicClient(discord.Client):
     """A Discord Client that is controllable by the host via a Console."""
