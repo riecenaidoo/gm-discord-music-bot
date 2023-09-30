@@ -1,6 +1,15 @@
 """Tools for managing the playlist of the bot."""
 
+import logging
+import utils
+
 from random import randrange
+
+
+
+_log = logging.getLogger(__name__)
+_log.addHandler(utils.HANDLER)
+_log.setLevel(logging.INFO)
 
 
 class Playlist:
@@ -111,12 +120,14 @@ class Playlist:
         self.shuffle = False
         self.loop = False
         self.repeat = False
+        _log.info(f"Playlist Mode: Default")
 
     def shuffle_mode(self):
         """Toggles shuffle mode. Shuffling pops songs in a random order.
         """
 
         self.shuffle = not self.shuffle
+        _log.info(f"Shuffle Mode:{self.shuffle}")
 
     def loop_mode(self):
         """Toggles loop all mode. Looping will append songs to the queue after they are popped off.
@@ -127,12 +138,17 @@ class Playlist:
 
         if self.loop and self.repeat:
             self.repeat = False
+            _log.debug(f"Turning off Repeat Mode before enabling Loop Mode.")
+            
+        _log.info(f"Loop Mode:{self.loop}")
+
 
     def repeat_mode(self):
         """Toggles repeat mode. Repeating returns the currently popped song repeatedly.
         """
 
         self.repeat = not self.repeat
+        _log.info(f"Repeat Mode:{self.repeat}")
 
     def clear(self):
         """Removes all songs from the Playlist.
@@ -141,6 +157,8 @@ class Playlist:
         self.song_queue.clear()
         self.current_song = None
         self.recently_played_stack.clear()
+        _log.info("Cleared playlist.")
+        
 
 
 if __name__ == '__main__':

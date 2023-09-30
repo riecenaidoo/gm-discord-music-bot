@@ -104,13 +104,15 @@ class MusicClient(discord.Client):
             print(f"[{index}] - {channel}")
 
     async def voice_join(self, channel_index: int):
-        _log.info("Joining voice channel.")
         if self.voice_client is not None:
+            _log.debug("Bot is in a voice channel already, moving bot to new channel instead of joining.")
             await self.voice_client.move_to(self.voice_channels[channel_index])
             return
 
         if (channel_index >= 0) and (channel_index < len(self.voice_channels)):
+            _log.debug("Joining voice channel.")
             self.voice_client = await discord.VoiceChannel.connect(self.voice_channels[channel_index])
+            _log.info(f"Joined '{self.voice_channels[channel_index]}'.")
         else:
             _log.warn(f"Invalid channel index '{channel_index}'. Current voice channels available: {len(self.voice_channels)}.")
 
@@ -143,16 +145,10 @@ class MusicClient(discord.Client):
         self.voice_client.stop()
         _log.info("Stopped and cleared the playlist.")
 
-    def playlist_clear(self):
-        """Clears the playlist."""
-        
-        self.playlist.clear()
-        _log.info("Cleared playlist.")
-
     async def playlist_play(self, urls: list[str]):
         """Overrides the Playlist with new songs, playing them"""
 
-        self.playlist_clear()
+        self.playlist.clear()
         self.playlist_queue(urls)
         await self.song_skip()      
 
@@ -177,7 +173,7 @@ class MusicClient(discord.Client):
         volume = float(volume)
         volume /= 100
         if not (0.0 <= volume <= 1.0):
-            _log.warn(f"Ignoring request to set volume_level(0-100) to invalid level of '{volume*100}'.")
+            _log.warn(f"Ignoring request to set `bot.volume_level` to '{int(volume*100)}' percent.")
             return
         
         if self.player is not None:
@@ -185,7 +181,7 @@ class MusicClient(discord.Client):
             _log.debug("Adjusted active player's volume.")
                
         self.VOLUME = volume
-        _log.info(f"Set bot's volume level to {volume*100}.")
+        _log.info(f"Volume @ {int(volume*100)}%.")
 
     # Song Controls
     @__requires_voice_connected
@@ -245,7 +241,7 @@ def __build_console_commands(console:Console, client:MusicClient):
     console.add_command(StringArgsCommand("queue", client.playlist_queue))
     console.add_command(Command("start", client.playlist_start))
     console.add_command(Command("stop", client.playlist_stop))
-    console.add_command(Command("clear", client.playlist_clear))
+    console.add_command(Command("clear", client.playlist.clear))
     console.add_command(StringArgsCommand("play", client.playlist_play))
     # Playlist Mode Controls
     console.add_command(Command("shuffle", client.playlist.shuffle_mode))
