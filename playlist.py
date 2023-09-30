@@ -113,21 +113,20 @@ class Playlist:
 
         return self.recently_played_stack.pop(0)
 
-    def default_mode(self):
-        """Set playlist to default mode. Pops songs off in sequence.
+    def no_looping_mode(self):
+        """Toggles looping modes off. Songs will not repeat again.
         """
 
-        self.shuffle = False
         self.loop = False
         self.repeat = False
-        _log.info(f"Playlist Mode: Default")
+        _log.info(f"Loop/Repeat Mode: OFF")
 
     def shuffle_mode(self):
         """Toggles shuffle mode. Shuffling pops songs in a random order.
         """
 
         self.shuffle = not self.shuffle
-        _log.info(f"Shuffle Mode:{self.shuffle}")
+        _log.info(f"Shuffle Mode: {'ON' if self.shuffle else 'OFF'}")
 
     def loop_mode(self):
         """Toggles loop all mode. Looping will append songs to the queue after they are popped off.
@@ -140,15 +139,14 @@ class Playlist:
             self.repeat = False
             _log.debug(f"Turning off Repeat Mode before enabling Loop Mode.")
             
-        _log.info(f"Loop Mode:{self.loop}")
-
+        _log.info(f"Loop Mode: {'ON' if self.loop else 'OFF'}")
 
     def repeat_mode(self):
         """Toggles repeat mode. Repeating returns the currently popped song repeatedly.
         """
 
         self.repeat = not self.repeat
-        _log.info(f"Repeat Mode:{self.repeat}")
+        _log.info(f"Repeat Mode: {'ON' if self.repeat else 'OFF'}")
 
     def clear(self):
         """Removes all songs from the Playlist.

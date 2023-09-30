@@ -247,7 +247,7 @@ def __build_console_commands(console:Console, client:MusicClient):
     console.add_command(Command("shuffle", client.playlist.shuffle_mode))
     console.add_command(Command("loop", client.playlist.loop_mode))
     console.add_command(Command("repeat", client.playlist.repeat_mode))
-    console.add_command(Command("normal", client.playlist.default_mode))
+    console.add_command(Command("normal", client.playlist.no_looping_mode))
 
 
 def build_console(client:MusicClient) -> Console:
