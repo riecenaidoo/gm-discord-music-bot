@@ -1,5 +1,6 @@
 """Discord bot functionality is handled by this module."""
 import asyncio
+import time
 from typing import Any
 
 import discord
@@ -61,20 +62,39 @@ class MusicClient(discord.Client):
     async def quit(self):
         """Stops the MusicClient and shuts it down."""
         
-        _log.info("Shutting down the MusicClient")
+        _log.debug("Shutting down the MusicClient.")
         if self.voice_client:
             await self.voice_leave()
+            _log.debug("Leaving time for player's callback to resolve.")
+            time.sleep(2)
         await self.close()
+        _log.info("Bot has shutdown.")
 
     # Audio Streaming Logic
     @__requires_voice_connected
-    async def stream_youtube_url(self, url):
-        """Plays a YouTube URL"""
+    async def _stream_youtube_url(self, url:str):
+        """|coro| Streams a song from YouTube in the connected voice channel.
+
+        Will attempt to validate the Bot's state before playing the requested song,
+        to avoid crashing the Bot service, this may result in songs being skipped/
+        play requests being ignored.
+
+        Callbacks to `stream_next` to cycle through the playlist.
+
+        Args:
+            url (str): YouTube URL of the song to stream.
+        """
         
         async with timeout(10):
             self.player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
             if self.player:
-                _log.info(f"Now Playing {self.player.title}")
+                if self.voice_client.is_playing():
+                    _log.error("Audio Player requested to play audio, "+ 
+                               "while already playing audio.\nLikely a usage error, "
+                               "or async event-loop failure. Was the Bot shutting down?")
+                    return
+                
+                _log.info(f"Now Playing: \"{self.player.title}\".")
                 self.player.volume = self.VOLUME
                 self.voice_client.play(self.player,
                                     after=lambda e: asyncio.run_coroutine_threadsafe(self.stream_next(e),
@@ -93,7 +113,7 @@ class MusicClient(discord.Client):
         else:
             try:
                 url = self.playlist.next()
-                await self.stream_youtube_url(url)
+                await self._stream_youtube_url(url)
             except Playlist.ExhaustedException:
                 _log.info("Playlist exhausted.")
 
@@ -104,13 +124,15 @@ class MusicClient(discord.Client):
             print(f"[{index}] - {channel}")
 
     async def voice_join(self, channel_index: int):
-        _log.info("Joining voice channel.")
         if self.voice_client is not None:
+            _log.debug("Bot is in a voice channel already, moving bot to new channel instead of joining.")
             await self.voice_client.move_to(self.voice_channels[channel_index])
             return
 
         if (channel_index >= 0) and (channel_index < len(self.voice_channels)):
+            _log.debug("Joining voice channel.")
             self.voice_client = await discord.VoiceChannel.connect(self.voice_channels[channel_index])
+            _log.info(f"Joined '{self.voice_channels[channel_index]}'.")
         else:
             _log.warn(f"Invalid channel index '{channel_index}'. Current voice channels available: {len(self.voice_channels)}.")
 
@@ -143,16 +165,10 @@ class MusicClient(discord.Client):
         self.voice_client.stop()
         _log.info("Stopped and cleared the playlist.")
 
-    def playlist_clear(self):
-        """Clears the playlist."""
-        
-        self.playlist.clear()
-        _log.info("Cleared playlist.")
-
     async def playlist_play(self, urls: list[str]):
         """Overrides the Playlist with new songs, playing them"""
 
-        self.playlist_clear()
+        self.playlist.clear()
         self.playlist_queue(urls)
         await self.song_skip()      
 
@@ -177,7 +193,7 @@ class MusicClient(discord.Client):
         volume = float(volume)
         volume /= 100
         if not (0.0 <= volume <= 1.0):
-            _log.warn(f"Ignoring request to set volume_level(0-100) to invalid level of '{volume*100}'.")
+            _log.warn(f"Ignoring request to set `bot.volume_level` to '{int(volume*100)}' percent.")
             return
         
         if self.player is not None:
@@ -185,7 +201,7 @@ class MusicClient(discord.Client):
             _log.debug("Adjusted active player's volume.")
                
         self.VOLUME = volume
-        _log.info(f"Set bot's volume level to {volume*100}.")
+        _log.info(f"Volume @ {int(volume*100)}%.")
 
     # Song Controls
     @__requires_voice_connected
@@ -245,13 +261,13 @@ def __build_console_commands(console:Console, client:MusicClient):
     console.add_command(StringArgsCommand("queue", client.playlist_queue))
     console.add_command(Command("start", client.playlist_start))
     console.add_command(Command("stop", client.playlist_stop))
-    console.add_command(Command("clear", client.playlist_clear))
+    console.add_command(Command("clear", client.playlist.clear))
     console.add_command(StringArgsCommand("play", client.playlist_play))
     # Playlist Mode Controls
     console.add_command(Command("shuffle", client.playlist.shuffle_mode))
     console.add_command(Command("loop", client.playlist.loop_mode))
     console.add_command(Command("repeat", client.playlist.repeat_mode))
-    console.add_command(Command("normal", client.playlist.default_mode))
+    console.add_command(Command("normal", client.playlist.no_looping_mode))
 
 
 def build_console(client:MusicClient) -> Console:
