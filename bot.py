@@ -1,5 +1,6 @@
 """Discord bot functionality is handled by this module."""
 import asyncio
+import time
 from typing import Any
 
 import discord
@@ -61,19 +62,38 @@ class MusicClient(discord.Client):
     async def quit(self):
         """Stops the MusicClient and shuts it down."""
         
-        _log.info("Shutting down the MusicClient")
+        _log.debug("Shutting down the MusicClient.")
         if self.voice_client:
             await self.voice_leave()
+            _log.debug("Leaving time for player's callback to resolve.")
+            time.sleep(2)
         await self.close()
+        _log.info("Bot has shutdown.")
 
     # Audio Streaming Logic
     @__requires_voice_connected
-    async def stream_youtube_url(self, url):
-        """Plays a YouTube URL"""
+    async def _stream_youtube_url(self, url:str):
+        """|coro| Streams a song from YouTube in the connected voice channel.
+
+        Will attempt to validate the Bot's state before playing the requested song,
+        to avoid crashing the Bot service, this may result in songs being skipped/
+        play requests being ignored.
+
+        Callbacks to `stream_next` to cycle through the playlist.
+
+        Args:
+            url (str): YouTube URL of the song to stream.
+        """
         
         async with timeout(10):
             self.player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
             if self.player:
+                if self.voice_client.is_playing():
+                    _log.error("Audio Player requested to play audio, "+ 
+                               "while already playing audio.\nLikely a usage error, "
+                               "or async event-loop failure. Was the Bot shutting down?")
+                    return
+                
                 _log.info(f"Now Playing: \"{self.player.title}\".")
                 self.player.volume = self.VOLUME
                 self.voice_client.play(self.player,
@@ -93,7 +113,7 @@ class MusicClient(discord.Client):
         else:
             try:
                 url = self.playlist.next()
-                await self.stream_youtube_url(url)
+                await self._stream_youtube_url(url)
             except Playlist.ExhaustedException:
                 _log.info("Playlist exhausted.")
 
