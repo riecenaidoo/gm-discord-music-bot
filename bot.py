@@ -74,7 +74,7 @@ class MusicClient(discord.Client):
         async with timeout(10):
             self.player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop, stream=True)
             if self.player:
-                _log.info(f"Now Playing {self.player.title}")
+                _log.info(f"Now Playing: \"{self.player.title}\".")
                 self.player.volume = self.VOLUME
                 self.voice_client.play(self.player,
                                     after=lambda e: asyncio.run_coroutine_threadsafe(self.stream_next(e),
