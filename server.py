@@ -24,16 +24,34 @@ class Server:
 
     @to_thread
     def connect(self):
+        """Awaits a client connection.
+        """
         (self.client_socket, self.address) = self.server_socket.accept()
 
 
     def disconnect(self):
+        """Disconnects the client and server sockets.
+        """
+        
         self.server_socket.shutdown(socket.SHUT_RDWR)
         self.server_socket.close()
         self.client_socket.shutdown(socket.SHUT_RDWR)
         self.client_socket.close()
 
-    def receive_line(self):
+
+    def receive_line(self)->str:
+        """Receives bytes of information, in chunks of 1024, from the client socket, until a newline character is reached.
+
+        Bytes of characters that were received, but not part of the String being terminated by the newline character
+        will be saved for the next as part of the next receive_line call.
+
+        Raises:
+            Server.ConnectionBrokenException: If the connection was terminated before a full line was received.
+
+        Returns:
+            str: Decoded string sent from the client.
+        """
+        
         chunks = []
 
         while len(self.buffer) > 0:
@@ -42,7 +60,7 @@ class Server:
                 i = buffered.index(b'\n')
                 chunks.append(buffered[:i])
                 self.buffer.append(buffered[i + 1:])
-                return b''.join(chunks)
+                return b''.join(chunks).decode()
             else:
                 chunks.append(buffered)
 
@@ -55,7 +73,7 @@ class Server:
                 i = chunk.index(b'\n')
                 chunks.append(chunk[:i])
                 self.buffer.append(chunk[i + 1:])
-                return b''.join(chunks)
+                return b''.join(chunks).decode()
             else:
                 chunks.append(chunk)
 
@@ -100,6 +118,6 @@ class WebSocketConsole:
         @returns a list containing a command and its arguments.
         @raises Server.ConnectionBrokenException when the socket disconnects.
         """
-        instruction = self.SERVER.receive_line().decode()
+        instruction = self.SERVER.receive_line()
         self.SERVER.send_line("200/OK")
         return instruction.split(" ")
