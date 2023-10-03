@@ -30,6 +30,8 @@ class Server:
     def disconnect(self):
         self.server_socket.shutdown(socket.SHUT_RDWR)
         self.server_socket.close()
+        self.client_socket.shutdown(socket.SHUT_RDWR)
+        self.client_socket.close()
 
     def receive_line(self):
         chunks = []
