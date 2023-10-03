@@ -1,8 +1,10 @@
-import socket
-from console import Console, to_thread
-import logging
-import utils
+"""Socket logic that enables the Bot to be controlled over WebSocket."""
 
+import socket
+import logging
+
+import utils
+from console import Console, to_thread
 
 
 _log = logging.getLogger(__name__)
@@ -11,7 +13,18 @@ _log.setLevel(logging.INFO)
 
 
 class Server:
-    def __init__(self, hostname, port):
+    """Simple single client server over a socket that sends/receives
+    messages in lines (terminated by '/n') of Strings."""
+    
+    def __init__(self, hostname:str, port:int):
+        """Creates a simple single client server over a socket that sends/receives
+    messages in lines (terminated by '/n') of Strings.
+
+        Args:
+            hostname (str): Hostname of the server socket.
+            port (int): Port to open the server socket on.
+        """
+        
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)    # Allow reused afterwards
         self.server_socket.bind((hostname, port))
@@ -20,18 +33,19 @@ class Server:
         self.buffer = []
 
     class ConnectionBrokenException(Exception):
+        """Explicit exception raised when the connection to the client
+        is broken. 
+        """
         pass
 
     @to_thread
     def connect(self):
-        """Awaits a client connection.
-        """
+        """Awaits a client connection."""
         (self.client_socket, self.address) = self.server_socket.accept()
 
 
     def disconnect(self):
-        """Disconnects the client and server sockets.
-        """
+        """Disconnects the client and server sockets."""
         
         self.server_socket.shutdown(socket.SHUT_RDWR)
         self.server_socket.close()
@@ -49,7 +63,7 @@ class Server:
             Server.ConnectionBrokenException: If the connection was terminated before a full line was received.
 
         Returns:
-            str: Decoded string sent from the client.
+            str: Decoded string message  sent from the client.
         """
         
         chunks = []
@@ -77,7 +91,20 @@ class Server:
             else:
                 chunks.append(chunk)
 
-    def send_line(self, msg):
+    def send_line(self, msg:str):
+        """Sends a message over the socket to the client.
+
+        If the message is not terminated by a newline, one will be added, before it is encoded.
+
+
+        Args:
+            msg (str): Unencoded string message to send over the socket to the client.
+
+        Raises:
+            Server.ConnectionBrokenException: If the connection was terminated before a full line was sent,
+            which is realised when 0 bytes of the message have sent over the socket after a `socket.send` call.
+        """
+        
         if not msg.endswith("\n"):
             msg = msg + "\n"
         msg = msg.encode()
