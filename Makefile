@@ -26,14 +26,14 @@ mock: SHELL:= /bin/bash	# Specifically only on Bash.
 mock: HOST?=
 mock: PORT?=
 mock:
-	@if test -n "$$HOST" && test -n ""$$PORT""; then \ 
-		echo "Set Both";\
-	elif test -n ""$$HOST""; then\
-		echo "Just host";\
-	elif test -n ""$$PORT""; then\
-		echo "Just port";\
-	else\
-		echo "neither";\
+	@if test -n "$$HOST" && test -n "$$PORT";\
+		then echo "Set Both";\
+	elif test -n "$$HOST";\
+		then echo "Just host";\
+	elif test -n "$$PORT";\
+		then echo "Just port";\
+	else echo "neither";\
+	\
 	fi;
 
 clean:
