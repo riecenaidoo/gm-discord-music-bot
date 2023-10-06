@@ -49,8 +49,9 @@ class Server:
 
         self.server_socket.shutdown(socket.SHUT_RDWR)
         self.server_socket.close()
-        self.client_socket.shutdown(socket.SHUT_RDWR)
-        self.client_socket.close()
+        if self.client_socket:
+            self.client_socket.shutdown(socket.SHUT_RDWR)
+            self.client_socket.close()
 
     def receive_line(self) -> str:
         """Receives bytes of information, in chunks of 1024, from the client socket, until a newline character is reached.
