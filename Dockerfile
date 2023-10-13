@@ -1,7 +1,7 @@
-FROM debian:buster-slim
+FROM python:3.10-alpine
 
-RUN apt-get update
-RUN apt-get install -y python3.10 python3-pip ffmpeg
+RUN apk update && apk upgrade
+RUN apk add ffmpeg
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
