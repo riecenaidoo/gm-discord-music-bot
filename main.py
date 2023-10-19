@@ -10,6 +10,7 @@ import asyncio
 import discord
 import dotenv
 # Local
+import api
 import bot
 import utils
 from server import WebSocketConsole
@@ -36,6 +37,7 @@ def run(token: str, hostname, port: int):
         handler=utils.HANDLER, formatter=utils.FORMATTER, level=logging.WARNING, root=False)
     client = bot.build_client()
     console = bot.build_console(client)
+    API = api.APIHandler(client, "__name__")
     _log.info(f"Starting WebSocket @ {hostname}/{port}")
     web_console = WebSocketConsole(
         console=console, hostname=hostname, port=port)
@@ -48,6 +50,7 @@ def run(token: str, hostname, port: int):
         console.online = False
         web_console.stop()
         await client.quit()
+        API.quit()
         _log.info("BoBo says, 'Tata for now!'.")
 
     console.add_command(Command("quit", quit))
@@ -58,7 +61,7 @@ def run(token: str, hostname, port: int):
 
         await asyncio.gather(client.start(token=token, reconnect=True),
                              console.start(get_console_input),
-                             web_console.start())
+                             web_console.start(), API.start("localhost", 5050))
 
     try:
         asyncio.run(runner())

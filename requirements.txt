@@ -2,3 +2,4 @@ discord.py
 PyNaCl
 git+https://github.com/ytdl-org/youtube-dl.git@master#egg=youtube_dl
 python-dotenv~=1.0.0
+flask[async]
