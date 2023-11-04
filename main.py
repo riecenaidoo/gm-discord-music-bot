@@ -76,7 +76,7 @@ if __name__ == "__main__":
     or using a `.env` file as the variable/key `DISCORD_BOT_TOKEN`.
     """
 
-    HOSTNAME = "localhost"  # Defaults
+    HOSTNAME = "0.0.0.0"  # Defaults
     PORT = 5000
 
     dotenv.load_dotenv()
