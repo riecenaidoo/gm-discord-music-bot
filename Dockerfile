@@ -1,6 +1,6 @@
-FROM alpine:latest
+FROM alpine:3.18.4
 
-RUN apk add --update --no-cache \
+RUN apk add --no-cache \
 	python3 \ 
 	py3-pip \
 	ffmpeg \
