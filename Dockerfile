@@ -1,8 +1,11 @@
-FROM python:3.10-alpine
+FROM alpine:latest
 
-RUN apk update && apk upgrade
-RUN apk add ffmpeg git
-    # youtube-dl is install via git
+RUN apk add --update --no-cache \
+	python3 \ 
+	py3-pip \
+	ffmpeg \
+	git
+# youtube-dl is install via git
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
