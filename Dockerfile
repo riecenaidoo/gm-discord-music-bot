@@ -5,7 +5,7 @@ RUN apk add --no-cache \
 	py3-pip \
 	ffmpeg \
 	git
-# youtube-dl is install via git
+# youtube-dl is installed via git
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
