@@ -1,7 +1,6 @@
 import discord
 from flask import Flask
 from flask import request
-import json
 import asyncio
 import functools
 import typing
@@ -33,8 +32,13 @@ class APIHandler(Flask):
     def build_command_handler(self):
         self.add_url_rule("/command/channel", view_func=self.get_channels)
         self.add_url_rule("/command/join/<int:channel_number>", view_func=lambda channel_number: self.join_channel(channel_number), methods=["POST"])
-        self.add_url_rule("/command/leave", view_func=self.leave_channel)
-        self.add_url_rule("/command/pause", view_func=self.pause)
+        self.add_url_rule("/command/leave", view_func=self.leave_channel, methods=["POST"])
+        self.add_url_rule("/command/pause", view_func=self.pause, methods=["POST"])
+        self.add_url_rule("/command/resume", view_func=self.resume, methods=["POST"])
+        self.add_url_rule("/command/volume/<int:volume_number>", view_func=lambda volume_number: self.volume(volume_number), methods=["POST"])
+        self.add_url_rule("/command/skip", view_func=self.skip)
+        self.add_url_rule("/command/prev", view_func=self.previous)
+        self.add_url_rule("/command/playlist_queue" view_func=playlist_queue)
 
     def get_channels(self):
         return str(self.client.voice_channels)
@@ -44,7 +48,7 @@ class APIHandler(Flask):
         asyncio.run_coroutine_threadsafe(self.client.voice_leave, self.client.loop)
         return "Left Channel"
 
-    def join_channel(self, channel_id):
+    def join_channel(self, channel_id:int):
         asyncio.run_coroutine_threadsafe(self.client.voice_leave(channel_id), self.client.loop)
         return "Joined Channel"
 
@@ -56,8 +60,8 @@ class APIHandler(Flask):
         asyncio.run_coroutine_threadsafe(self.client.audio_resume, self.client.loop)
         return "Resumed"
     
-    def volume(self):
-        asyncio.run_coroutine_threadsafe(self.client.set_audio_volume, self.client.loop)
+    def volume(self, volume:int):
+        asyncio.run_coroutine_threadsafe(self.client.set_audio_volume(volume), self.client.loop)
         return "Volume has been set"
 
     def skip(self):
@@ -68,7 +72,42 @@ class APIHandler(Flask):
         asyncio.run_coroutine_threadsafe(self.client.song_prev, self.client.loop)
         return "Returning to Previous Song"
     
-    def 
+    def playlist_queue(self):
+        songs = request.json['songs']
+        asyncio.run_coroutine_threadsafe(self.client.playlist_queue(songs), self.client.loop)
+        return "Added songs to the playlist"
+    
+    def playlist_start(self):
+        asyncio.run_coroutine_threadsafe(self.client.playlist_start, self.client.loop)
+        return "Starting Playlist..."
+    
+    def playlist_stop(self):
+        asyncio.run_coroutine_threadsafe(self.client.playlist_stop, self.client.loop)
+        return "Playlist Stopped!"
+    
+    def playlist_clear(self):
+        asyncio.run_coroutine_threadsafe(self.client.clear, self.client.loop)
+        return "Cleared List of Songs"
+    
+    def playlist_play(self):
+        asyncio.run_coroutine_threadsafe(self.client.playlist_play, self.client.loop)
+        return "Playing New Playlist"
+    
+    def shuffle(self):
+        asyncio.run_coroutine_threadsafe(self.client.shuffle_mode, self.client.loop)
+        return "Shuffled Songs"
+    
+    def loop_songs(self):
+        asyncio.run_coroutine_threadsafe(self.client.loop_mode, self.client.loop)
+        return "Looping All Songs"
+    
+    def repeat(self):
+        asyncio.run_coroutine_threadsafe(self.client.repeat_mode, self.client.loop)
+        return "Repeating Song..."
+    
+    def no_loop(self):
+        asyncio.run_coroutine_threadsafe(self.client.no_looping_mode, self.client.loop)
+        return "Normal Play Resuming"
 
 def run():
     intents = discord.Intents.default()
