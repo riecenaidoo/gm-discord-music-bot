@@ -61,7 +61,7 @@ def run(token: str, hostname, port: int):
 
         await asyncio.gather(client.start(token=token, reconnect=True),
                              console.start(get_console_input),
-                             web_console.start(), API.start("localhost", 5050))
+                             web_console.start(), API.start(HOSTNAME, ))
 
     try:
         asyncio.run(runner())
@@ -81,6 +81,7 @@ if __name__ == "__main__":
 
     HOSTNAME = "localhost"  # Defaults
     PORT = 5000
+    API_PORT = 5050
 
     dotenv.load_dotenv()
     bot_token = os.environ.get("DISCORD_BOT_TOKEN", None)
@@ -95,6 +96,8 @@ if __name__ == "__main__":
                         help=f"Set the HOSTNAME to host the WebSocket on. Defaults to '{HOSTNAME}'.")
     parser.add_argument("-p", "--PORT", type=int,
                         help=f"Set the PORT to host the WebSocket on. Defaults to '{PORT}'.")
+    parser.add_argument("-a", "--API_PORT", type=int,
+                        help="Set the PORT to host the API on. Defaults to '{API_PORT}'.")
     args = parser.parse_args()
 
     if args.TOKEN:

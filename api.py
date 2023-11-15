@@ -38,7 +38,15 @@ class APIHandler(Flask):
         self.add_url_rule("/command/volume/<int:volume_number>", view_func=lambda volume_number: self.volume(volume_number), methods=["POST"])
         self.add_url_rule("/command/skip", view_func=self.skip)
         self.add_url_rule("/command/prev", view_func=self.previous)
-        self.add_url_rule("/command/playlist_queue", view_func=self.playlist_queue)
+        self.add_url_rule("/command/playlist/queue", view_func=self.playlist_queue)
+        self.add_url_rule("/command/playlist/start", view_func=self.playlist_start)
+        self.add_url_rule("/command/playlist/stop", view_func=self.playlist_stop)
+        self.add_url_rule("/command/playlist/clear", view_func=self.playlist_clear)
+        self.add_url_rule("/command/shuffle", view_func=self.shuffle)
+        self.add_url_rule("/command/loop", view_func=self.loop_songs)
+        self.add_url_rule("/command/repeat", view_func=self.repeat)
+        self.add_url_rule("/command/no_loop", view_func=self.no_loop)
+
 
     def get_channels(self):
         return str(self.client.voice_channels)
@@ -108,7 +116,3 @@ class APIHandler(Flask):
     def no_loop(self):
         asyncio.run_coroutine_threadsafe(self.client.no_looping_mode, self.client.loop)
         return "Normal Play Resuming"
-
-def run():
-    intents = discord.Intents.default()
-    intents.message_content = True
