@@ -38,7 +38,7 @@ class APIHandler(Flask):
         self.add_url_rule("/command/volume/<int:volume_number>", view_func=lambda volume_number: self.volume(volume_number), methods=["POST"])
         self.add_url_rule("/command/skip", view_func=self.skip)
         self.add_url_rule("/command/prev", view_func=self.previous)
-        self.add_url_rule("/command/playlist_queue" view_func=playlist_queue)
+        self.add_url_rule("/command/playlist_queue", view_func=self.playlist_queue)
 
     def get_channels(self):
         return str(self.client.voice_channels)
