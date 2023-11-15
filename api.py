@@ -1,4 +1,4 @@
-import discord
+
 from flask import Flask
 from flask import request
 import asyncio
