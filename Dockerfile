@@ -10,8 +10,8 @@ RUN apk add --no-cache \
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY *.py ./
-COPY .env ./
+WORKDIR discord-music-bot/
+COPY src/ ./
 
 EXPOSE 5000
 

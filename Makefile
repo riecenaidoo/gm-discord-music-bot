@@ -2,9 +2,8 @@ PYTHON_HOME = python3
 VENV = .venv
 PYTHON = $(VENV)/bin/python3
 PIP = $(VENV)/bin/pip
+MAIN = src/main.py
 
-
-.PHONY: run help clean
 
 
 $(VENV)/bin/activate: requirements.txt
@@ -12,11 +11,13 @@ $(VENV)/bin/activate: requirements.txt
 	$(PIP) install -r requirements.txt
 
 
+.PHONY: run
 run: ARGS?=
 run: $(VENV)/bin/activate
-	$(PYTHON) main.py $(ARGS)
+	$(PYTHON) $(MAIN) $(ARGS)
 
 
+.PHONY: help
 help: $(VENV)/bin/activate
 	@echo "\n---------------------------------------"
 	@echo "Makefile Help:"
@@ -27,10 +28,12 @@ help: $(VENV)/bin/activate
 	@echo "---------------------------------------"
 	@echo "Script Args:"
 	@echo "---------------------------------------"
-	@$(PYTHON) main.py -h
+	@$(PYTHON) $(MAIN) -h
 	@echo "---------------------------------------\n"
 
 
+.PHONY:clean
 clean:
-	rm -rf __pycache__
+	rm -rf src/__pycache__
+	rm -rf src/bot/__pycache__
 	rm -rf $(VENV)
