@@ -1,17 +1,17 @@
 """Contains the entry point script to initialise the different components of the Bot and
 start the asyncio event loop. Handles environment variables and cli args."""
 
-import sys
-import os
 import argparse
-import logging
 import asyncio
-# Installed
+import logging
+import os
+import sys
+
 import discord
 import dotenv
-# Local
-from bot.music_client import build_client
+
 import utils
+from bot.music_client import build_client
 from companion import CompanionConsole
 from console import Command, build_console
 
@@ -22,10 +22,11 @@ _log.setLevel(logging.INFO)
 
 
 def get_console_input() -> list[str]:
+    """Get a line of input from the command-line, split by spaces."""
     instruction = ""
     while len(instruction) == 0:
         instruction = input()
-    _log.debug(f"Received input '{instruction}'.")
+    _log.debug("Received input '%s'.", instruction)
     return instruction.split(" ")
 
 
@@ -36,11 +37,11 @@ def run(token: str, hostname, port: int):
         handler=utils.HANDLER, formatter=utils.FORMATTER, level=logging.WARNING, root=False)
     client = build_client()
     console = build_console(client)
-    _log.info(f"Opening TCP Socket @ {hostname}/{port}")
+    _log.info("Opening TCP Socket @ %s/%s", hostname, port)
     web_console = CompanionConsole(
         console=console, hostname=hostname, port=port)
 
-    async def quit():
+    async def shutdown():
         """|coro| Shuts down the Consoles and the Client."""
 
         _log.debug(
@@ -50,7 +51,7 @@ def run(token: str, hostname, port: int):
         await client.quit()
         _log.info("BoBo says, 'Tata for now!'.")
 
-    console.add_command(Command("quit", quit))
+    console.add_command(Command("quit", shutdown))
 
     async def runner():
         """|coro| Starts the coroutines of the Bot and its consoles, submitting
@@ -69,12 +70,11 @@ def run(token: str, hostname, port: int):
 
 
 if __name__ == "__main__":
-    """
-    Token controls access to the Discord bot.
-    For safety, it is passed through an environment variable.
-    You can set the environment variable in your shell,
-    or using a `.env` file as the variable/key `DISCORD_BOT_TOKEN`.
-    """
+
+    # Token controls access to the Discord bot.
+    # For safety, it is passed through an environment variable.
+    # You can set the environment variable in your shell,
+    # or using a `.env` file as the variable/key `DISCORD_BOT_TOKEN`.
 
     HOSTNAME = "0.0.0.0"  # Defaults
     PORT = 5000
@@ -87,9 +87,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--TOKEN",
                         help="Set the Bot TOKEN to use for connecting to Discord."
-                        + "\n\tWARNING: It is advisable to pass the token as an environment variable instead.")
+                        + "\n\tWARNING: It is advisable to pass the token as an "
+                        + "environment variable in the `.env` file instead.")
     parser.add_argument("-n", "--HOSTNAME",
-                        help=f"Set the HOSTNAME to host the WebSocket on. Defaults to '{HOSTNAME}'.")
+                        help="Set the HOSTNAME to host the WebSocket on. Defaults to"
+                        +f" '{HOSTNAME}'.")
     parser.add_argument("-p", "--PORT", type=int,
                         help=f"Set the PORT to host the WebSocket on. Defaults to '{PORT}'.")
     args = parser.parse_args()
@@ -103,7 +105,7 @@ if __name__ == "__main__":
     if args.PORT:
         socket_port = args.PORT
 
-    if bot_token == None:
+    if bot_token is None:
         _log.fatal(
             "Required environment variable `DISCORD_BOT_TOKEN` is missing.")
         sys.exit(5)   # Auth Error.

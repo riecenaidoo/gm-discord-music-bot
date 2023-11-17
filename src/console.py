@@ -93,7 +93,7 @@ class Console:
 
     def __init__(self):
         """Init..."""
-        self.commands: list[Command] = list()
+        self.commands: list[Command] = []
         self.online: bool = True
 
     def add_command(self, command: Command):

@@ -78,8 +78,7 @@ class Server:
                 chunks.append(buffered[:i])
                 self.buffer.append(buffered[i + 1:])
                 return b''.join(chunks).decode()
-            else:
-                chunks.append(buffered)
+            chunks.append(buffered)
 
         while True:
             chunk = self.client_socket.recv(1024)
@@ -91,8 +90,7 @@ class Server:
                 chunks.append(chunk[:i])
                 self.buffer.append(chunk[i + 1:])
                 return b''.join(chunks).decode()
-            else:
-                chunks.append(chunk)
+            chunks.append(chunk)
 
     def send_line(self, msg: str):
         """Sends a message over the socket to the client.
