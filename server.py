@@ -4,7 +4,7 @@ import socket
 import logging
 
 import utils
-from console import Console, to_thread
+from console import Console
 
 
 _log = logging.getLogger(__name__)
@@ -39,7 +39,7 @@ class Server:
         """
         pass
 
-    @to_thread
+    @utils.to_thread
     def connect(self):
         """Awaits a client connection."""
         (self.client_socket, self.address) = self.server_socket.accept()

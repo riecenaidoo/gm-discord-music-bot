@@ -1,7 +1,4 @@
 """Asynchronous console controls for the Discord bot are managed by this module."""
-import asyncio
-import functools
-import typing
 from inspect import iscoroutinefunction
 import logging
 import utils
@@ -12,13 +9,6 @@ _log = logging.getLogger(__name__)
 _log.addHandler(utils.HANDLER)
 _log.setLevel(logging.WARNING)
 
-
-def to_thread(func: typing.Callable):
-    @functools.wraps(func)
-    async def wrapper(*args, **kwargs):
-        return await asyncio.to_thread(func, *args, **kwargs)
-
-    return wrapper
 
 
 class Command:
@@ -133,7 +123,7 @@ class Console:
         as they are matched.
         """
         
-        get_input = to_thread(input_method)
+        get_input = utils.to_thread(input_method)
         while self.online:
             try:
                 command = await get_input()
