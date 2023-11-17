@@ -1,12 +1,11 @@
-# Virtual Environment
-.venv
-
-# IDE Configurations
+# Configs
 .vscode
 .idea
 
-# Environment Configuration Data
-.env
-
-# Cache Files
+# Build
 __pycache__
+.venv
+
+# Local
+.env
+RELEASES/
