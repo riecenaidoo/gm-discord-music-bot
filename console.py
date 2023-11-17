@@ -3,6 +3,7 @@ from inspect import iscoroutinefunction
 import logging
 import utils
 
+from bot import MusicClient
 
 
 _log = logging.getLogger(__name__)
@@ -55,6 +56,7 @@ class Command:
         """
         pass
 
+
 class StringArgsCommand(Command):
     """Extended Command that passes many string args to its callable function."""
     async def call(self, args: list[str]):
@@ -65,6 +67,7 @@ class StringArgsCommand(Command):
             await self.command_func(args[1:])
         else:
             self.command_func(args[1:])
+
 
 class IntArgCommand(Command):
     """Extended Command that passes an Integer argument to its callable function."""
@@ -83,7 +86,7 @@ class IntArgCommand(Command):
             await self.command_func(index)
         else:
             self.command_func(index)
-        
+
 
 class Console:
 
@@ -131,3 +134,47 @@ class Console:
             except Command.UsageError as e:
                 _log.warning(f"Command {command[0].upper()} Usage Error: '{e.args[0]}'.")
 
+
+def __build_console_commands(console:Console, client:MusicClient): 
+    """Builds the Commands to control a MusicClient to this Console.
+
+    Args:
+        console (Console): Console to add Commands to.
+        client (MusicClient): MusicClient this Console should control. 
+    """
+    # Voice Channel Controls
+    console.add_command(Command("channels", client.get_voice_channels))
+    console.add_command(IntArgCommand("join", client.voice_join))
+    console.add_command(Command("leave", client.voice_leave))
+    # Audio Controls
+    console.add_command(Command("pause", client.audio_pause))
+    console.add_command(Command("resume", client.audio_resume))
+    console.add_command(IntArgCommand("volume", client.set_audio_volume))
+    # Song Controls
+    console.add_command(Command("skip", client.song_skip))
+    console.add_command(Command("prev", client.song_prev))
+    # Playlist Controls
+    console.add_command(StringArgsCommand("queue", client.playlist_queue))
+    console.add_command(Command("start", client.playlist_start))
+    console.add_command(Command("stop", client.playlist_stop))
+    console.add_command(Command("clear", client.playlist.clear))
+    console.add_command(StringArgsCommand("play", client.playlist_play))
+    # Playlist Mode Controls
+    console.add_command(Command("shuffle", client.playlist.shuffle_mode))
+    console.add_command(Command("loop", client.playlist.loop_mode))
+    console.add_command(Command("repeat", client.playlist.repeat_mode))
+    console.add_command(Command("normal", client.playlist.no_looping_mode))
+
+
+def build_console(client:MusicClient) -> Console:
+    """Builds a Console for this MusicClient.
+
+    Args:
+        client (MusicClient): MusicClient for this Console to control.
+
+    Returns:
+        Console: Console that can control this MusicClient.
+    """
+    console = Console()
+    __build_console_commands(console, client)
+    return console

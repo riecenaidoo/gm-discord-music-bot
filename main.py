@@ -13,7 +13,7 @@ import dotenv
 import bot
 import utils
 from server import WebSocketConsole
-from console import Command
+from console import Command, build_console
 
 
 _log = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ def run(token: str, hostname, port: int):
     discord.utils.setup_logging(
         handler=utils.HANDLER, formatter=utils.FORMATTER, level=logging.WARNING, root=False)
     client = bot.build_client()
-    console = bot.build_console(client)
+    console = build_console(client)
     _log.info(f"Starting WebSocket @ {hostname}/{port}")
     web_console = WebSocketConsole(
         console=console, hostname=hostname, port=port)

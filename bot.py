@@ -7,7 +7,6 @@ import discord
 from discord import Intents 
 
 from YTDL import YTDLSource
-from console import Console, Command, StringArgsCommand, IntArgCommand
 from playlist import Playlist
 from async_timeout import timeout
 
@@ -237,48 +236,3 @@ def build_client() -> MusicClient:
     intents = discord.Intents.default()
     intents.message_content = True
     return MusicClient(intents=intents)
-
-
-def __build_console_commands(console:Console, client:MusicClient): 
-    """Builds the Commands to control a MusicClient to this Console.
-
-    Args:
-        console (Console): Console to add Commands to.
-        client (MusicClient): MusicClient this Console should control. 
-    """
-    # Voice Channel Controls
-    console.add_command(Command("channels", client.get_voice_channels))
-    console.add_command(IntArgCommand("join", client.voice_join))
-    console.add_command(Command("leave", client.voice_leave))
-    # Audio Controls
-    console.add_command(Command("pause", client.audio_pause))
-    console.add_command(Command("resume", client.audio_resume))
-    console.add_command(IntArgCommand("volume", client.set_audio_volume))
-    # Song Controls
-    console.add_command(Command("skip", client.song_skip))
-    console.add_command(Command("prev", client.song_prev))
-    # Playlist Controls
-    console.add_command(StringArgsCommand("queue", client.playlist_queue))
-    console.add_command(Command("start", client.playlist_start))
-    console.add_command(Command("stop", client.playlist_stop))
-    console.add_command(Command("clear", client.playlist.clear))
-    console.add_command(StringArgsCommand("play", client.playlist_play))
-    # Playlist Mode Controls
-    console.add_command(Command("shuffle", client.playlist.shuffle_mode))
-    console.add_command(Command("loop", client.playlist.loop_mode))
-    console.add_command(Command("repeat", client.playlist.repeat_mode))
-    console.add_command(Command("normal", client.playlist.no_looping_mode))
-
-
-def build_console(client:MusicClient) -> Console:
-    """Builds a Console for this MusicClient.
-
-    Args:
-        client (MusicClient): MusicClient for this Console to control.
-
-    Returns:
-        Console: Console that can control this MusicClient.
-    """
-    console = Console()
-    __build_console_commands(console, client)
-    return console
