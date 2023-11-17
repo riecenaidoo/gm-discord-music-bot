@@ -1,4 +1,4 @@
-"""Socket logic that enables the Bot to be controlled over WebSocket."""
+"""Socket logic to communicate with a companion app over a TCP Socket."""
 
 import socket
 import logging
@@ -117,14 +117,14 @@ class Server:
             total_sent = total_sent + sent
 
 
-class WebSocketConsole:
+class CompanionConsole:
     """Extension of the Console class that can receive commands
-    over a WebSocket.
+    over a Socket.
     """
 
     def __init__(self, console: Console, hostname: str, port: int):
         """Creates an extension of the Console class that receives input
-        for commands via a WebSocket.
+        for commands via a TCP Socket.
 
         Args:
             console (Console): Console to send input to.
@@ -149,25 +149,25 @@ class WebSocketConsole:
         return instruction.split(" ")
 
     async def start(self):
-        """|coro| Starts the WebSocketConsole. Awaits a connection.
+        """|coro| Starts the CompanionConsole. Awaits a connection.
 
         Once connected, will receive commands over the socket and send them to
         the Console to be executed.
         """
         while self.CONSOLE.online:
-            _log.debug("WebSocket Open...")
+            _log.debug("TCP Socket Open...")
             try:
                 await self.SERVER.connect()
-                _log.info("WebSocket Connected!")
+                _log.info("Companion Connected!")
                 try:
                     await self.CONSOLE.start(self.get_socket_input)
                 except Server.ConnectionBrokenException:
-                    _log.info("WebSocket Disconnected!")
+                    _log.info("Companion Disconnected!")
             except OSError:
-                _log.debug("Socket waiting for connection was interupted.")
+                _log.debug("TCP Socket waiting for connection was interupted.")
 
     def stop(self):
-        """Stops the WebConsole by disconnecting the socket it is connected to.
+        """Stops the CompanionConsole by disconnecting the socket it is connected to.
         """
 
         self.SERVER.disconnect()

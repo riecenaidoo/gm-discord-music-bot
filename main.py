@@ -12,7 +12,7 @@ import dotenv
 # Local
 import bot
 import utils
-from server import WebSocketConsole
+from companion import CompanionConsole
 from console import Command, build_console
 
 
@@ -36,8 +36,8 @@ def run(token: str, hostname, port: int):
         handler=utils.HANDLER, formatter=utils.FORMATTER, level=logging.WARNING, root=False)
     client = bot.build_client()
     console = build_console(client)
-    _log.info(f"Starting WebSocket @ {hostname}/{port}")
-    web_console = WebSocketConsole(
+    _log.info(f"Opening TCP Socket @ {hostname}/{port}")
+    web_console = CompanionConsole(
         console=console, hostname=hostname, port=port)
 
     async def quit():
