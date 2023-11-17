@@ -1,6 +1,7 @@
 """Asynchronous console controls for the Discord bot are managed by this module."""
-from inspect import iscoroutinefunction
+
 import logging
+from inspect import iscoroutinefunction
 
 import utils
 from bot.music_client import MusicClient
@@ -11,10 +12,9 @@ _log.addHandler(utils.HANDLER)
 _log.setLevel(logging.WARNING)
 
 
-
 class Command:
     """Wraps a callable function under an alias. 
-    
+
     Can be extended from to validate and pass arguments to the callable function.
     """
 
@@ -43,9 +43,11 @@ class Command:
         """Calls this Command's function. If the function is a coroutine, it will await it.
 
         Args:
-            args (list[str]): Placeholder for arguments to be passed to a callable func. Used when call is overriden by inheritors.
+            args (list[str]): Placeholder for arguments to be passed to a callable func. 
+            Used when call is overriden by inheritors.
         """
-        if(iscoroutinefunction(self.command_func)):
+        _log.debug("Ignoring unnessary args %s", args)
+        if iscoroutinefunction(self.command_func):
             await self.command_func()
         else:
             self.command_func()
@@ -54,16 +56,15 @@ class Command:
         """Raised by an extended Command if the additional arguments received
         for the Command were invalid.
         """
-        pass
 
 
 class StringArgsCommand(Command):
     """Extended Command that passes many string args to its callable function."""
     async def call(self, args: list[str]):
         if len(args) < 2:
-            raise self.UsageError(f"Expects atleast one argument")
+            raise self.UsageError("Expects atleast one argument")
 
-        if(iscoroutinefunction(self.command_func)):
+        if iscoroutinefunction(self.command_func):
             await self.command_func(args[1:])
         else:
             self.command_func(args[1:])
@@ -73,69 +74,75 @@ class IntArgCommand(Command):
     """Extended Command that passes an Integer argument to its callable function."""
     async def call(self, args: list[str]):
         if len(args) != 2:
-            raise self.UsageError(f"Expects one argument")
+            raise self.UsageError("Expects one argument")
 
         index = args[1]
 
         try:
             index = int(index)
-        except ValueError:
-            raise self.UsageError(f"Argument must be an Integer")
-        
-        if(iscoroutinefunction(self.command_func)):
+        except ValueError as exc:
+            raise self.UsageError("Argument must be an Integer") from exc
+        if iscoroutinefunction(self.command_func):
             await self.command_func(index)
         else:
             self.command_func(index)
 
 
 class Console:
+    """Console..."""
 
     def __init__(self):
-        self.COMMANDS:list[Command] = list()
-        self.online:bool = True
+        """Init..."""
+        self.commands: list[Command] = list()
+        self.online: bool = True
 
     def add_command(self, command: Command):
         """Adds a Command this Console can support matching against.
-        
+
         To prevent duplication, this method will not add a Command 
         if its alias matches an existing Command in this Console.
-        
+
         Args:
             command (Command): Command to add.
         """
-        for cmd in self.COMMANDS:
+
+        for cmd in self.commands:
             if cmd.match(command.alias):
-                _log.warning(f"Console already has a Command with the alias '{command.alias}'.")
+                _log.warning(
+                    "Console already has a Command with the alias '%s'.", command.alias)
                 return
-        self.COMMANDS.append(command)
+        self.commands.append(command)
 
     async def handle_command(self, args: list[str]):
         """Calls the appropriate Command from this Console, if any.
 
         Args:
-            args (list[str]): A list of arguments for the Command, where args[0] is the alias of the Command requested.
+            args (list[str]): A list of arguments for the Command, 
+            where args[0] is the alias of the Command requested.
         """
-        for cmd in self.COMMANDS:
+
+        for cmd in self.commands:
             if cmd.match(args[0]):
                 await cmd.call(args)
                 return
-        _log.warning(f"Command '{args[0]}' is not supported.")
+        _log.warning("Command '%s' is not supported.", args[0])
 
     async def start(self, input_method: callable):
         """Continously receives input and calls Commands
         as they are matched.
         """
-        
+
         get_input = utils.to_thread(input_method)
         while self.online:
             try:
                 command = await get_input()
                 await self.handle_command(command)
             except Command.UsageError as e:
-                _log.warning(f"Command {command[0].upper()} Usage Error: '{e.args[0]}'.")
+                _log.warning("Command %s Usage Error: '%s'.",
+                             command[0].upper(), e.args[0])
 
 
-def __build_console_commands(console:Console, client:MusicClient): 
+def __build_console_commands(console: Console, client: MusicClient):
     """Builds the Commands to control a MusicClient to this Console.
 
     Args:
@@ -166,7 +173,7 @@ def __build_console_commands(console:Console, client:MusicClient):
     console.add_command(Command("normal", client.playlist.no_looping_mode))
 
 
-def build_console(client:MusicClient) -> Console:
+def build_console(client: MusicClient) -> Console:
     """Builds a Console for this MusicClient.
 
     Args:
@@ -175,6 +182,7 @@ def build_console(client:MusicClient) -> Console:
     Returns:
         Console: Console that can control this MusicClient.
     """
+
     console = Console()
     __build_console_commands(console, client)
     return console
