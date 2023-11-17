@@ -1,9 +1,9 @@
 """Asynchronous console controls for the Discord bot are managed by this module."""
 from inspect import iscoroutinefunction
 import logging
-import utils
 
-from bot import MusicClient
+import utils
+from bot.music_client import MusicClient
 
 
 _log = logging.getLogger(__name__)

@@ -10,7 +10,7 @@ import asyncio
 import discord
 import dotenv
 # Local
-import bot
+from bot.music_client import build_client
 import utils
 from companion import CompanionConsole
 from console import Command, build_console
@@ -34,7 +34,7 @@ def run(token: str, hostname, port: int):
 
     discord.utils.setup_logging(
         handler=utils.HANDLER, formatter=utils.FORMATTER, level=logging.WARNING, root=False)
-    client = bot.build_client()
+    client = build_client()
     console = build_console(client)
     _log.info(f"Opening TCP Socket @ {hostname}/{port}")
     web_console = CompanionConsole(

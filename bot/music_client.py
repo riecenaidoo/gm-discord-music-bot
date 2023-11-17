@@ -1,4 +1,3 @@
-"""Discord bot functionality is handled by this module."""
 import asyncio
 import time
 from typing import Any
@@ -6,8 +5,8 @@ from typing import Any
 import discord
 from discord import Intents 
 
-from YTDL import YTDLSource
-from playlist import Playlist
+from .yt_source import YTDLSource
+from .playlist import Playlist
 from async_timeout import timeout
 
 import logging
