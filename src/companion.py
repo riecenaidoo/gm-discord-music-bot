@@ -1,10 +1,11 @@
 """Socket logic to communicate with a companion app over a TCP Socket."""
 
-import socket
 import logging
+import socket
 
 import utils
 from console import Console
+
 
 
 _log = logging.getLogger(__name__)
@@ -37,7 +38,6 @@ class Server:
         """Explicit exception raised when the connection to the client
         is broken. 
         """
-        pass
 
     @utils.to_thread
     def connect(self):
@@ -54,13 +54,16 @@ class Server:
             self.client_socket.close()
 
     def receive_line(self) -> str:
-        """Receives bytes of information, in chunks of 1024, from the client socket, until a newline character is reached.
-
-        Bytes of characters that were received, but not part of the String being terminated by the newline character
-        will be saved for the next as part of the next receive_line call.
+        """Receive the next string terminated by a newline character.
+        
+        Receives bytes of information, in chunks of 1024, from the client socket, 
+        until a newline character is reached. Bytes of characters that were received, 
+        but not part of the String being terminated by the newline character
+        will be saved in the `self.buffer` for the next receive_line call to read.
 
         Raises:
-            Server.ConnectionBrokenException: If the connection was terminated before a full line was received.
+            Server.ConnectionBrokenException: If the connection was terminated before a
+            full line was received.
 
         Returns:
             str: Decoded string message  sent from the client.
@@ -101,8 +104,9 @@ class Server:
             msg (str): Unencoded string message to send over the socket to the client.
 
         Raises:
-            Server.ConnectionBrokenException: If the connection was terminated before a full line was sent,
-            which is realised when 0 bytes of the message have sent over the socket after a `socket.send` call.
+            Server.ConnectionBrokenException: If the connection was terminated before 
+            a full line was sent, which is realised when 0 bytes of the message 
+            have sent over the socket after a `socket.send` call.
         """
 
         if not msg.endswith("\n"):
@@ -131,8 +135,8 @@ class CompanionConsole:
             hostname (str): Hostname of the server socket.
             port (int): Port to open the server socket on.
         """
-        self.SERVER = Server(hostname, port)
-        self.CONSOLE = console
+        self.server = Server(hostname, port)
+        self.console = console
 
     def get_socket_input(self) -> list[str]:
         """Receives input via the socket.
@@ -144,8 +148,8 @@ class CompanionConsole:
             list: A list containing a command and its arguments.
         """
 
-        instruction = self.SERVER.receive_line()
-        self.SERVER.send_line("200/OK")
+        instruction = self.server.receive_line()
+        self.server.send_line("200/OK")
         return instruction.split(" ")
 
     async def start(self):
@@ -154,13 +158,13 @@ class CompanionConsole:
         Once connected, will receive commands over the socket and send them to
         the Console to be executed.
         """
-        while self.CONSOLE.online:
+        while self.console.online:
             _log.debug("TCP Socket Open...")
             try:
-                await self.SERVER.connect()
+                await self.server.connect()
                 _log.info("Companion Connected!")
                 try:
-                    await self.CONSOLE.start(self.get_socket_input)
+                    await self.console.start(self.get_socket_input)
                 except Server.ConnectionBrokenException:
                     _log.info("Companion Disconnected!")
             except OSError:
@@ -170,4 +174,4 @@ class CompanionConsole:
         """Stops the CompanionConsole by disconnecting the socket it is connected to.
         """
 
-        self.SERVER.disconnect()
+        self.server.disconnect()
