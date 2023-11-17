@@ -18,7 +18,7 @@ HANDLER.setFormatter(FORMATTER)
 
 
 def to_thread(func: typing.Callable):
-    """Wrap a function to run asynchronously."""
+    """Wrap a function to run asynchronously in a separate thread.."""
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
         return await asyncio.to_thread(func, *args, **kwargs)
