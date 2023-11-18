@@ -7,7 +7,6 @@ import utils
 from console import Console
 
 
-
 _log = logging.getLogger(__name__)
 _log.addHandler(utils.HANDLER)
 _log.setLevel(logging.INFO)
@@ -19,16 +18,17 @@ class Server:
 
     def __init__(self, hostname: str, port: int):
         """Creates a simple single client server over a socket that sends/receives
-    messages in lines (terminated by '/n') of Strings.
+        messages in lines (terminated by '/n') of Strings.
 
-        Args:
-            hostname (str): Hostname of the server socket.
-            port (int): Port to open the server socket on.
+            Args:
+                hostname (str): Hostname of the server socket.
+                port (int): Port to open the server socket on.
         """
 
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(
-            socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)    # Allow reused afterwards
+            socket.SOL_SOCKET, socket.SO_REUSEADDR, 1
+        )  # Allow reused afterwards
         self.server_socket.bind((hostname, port))
         self.server_socket.listen(1)
         self.client_socket, self.address = None, None
@@ -36,7 +36,7 @@ class Server:
 
     class ConnectionBrokenException(Exception):
         """Explicit exception raised when the connection to the client
-        is broken. 
+        is broken.
         """
 
     @utils.to_thread
@@ -55,9 +55,9 @@ class Server:
 
     def receive_line(self) -> str:
         """Receive the next string terminated by a newline character.
-        
-        Receives bytes of information, in chunks of 1024, from the client socket, 
-        until a newline character is reached. Bytes of characters that were received, 
+
+        Receives bytes of information, in chunks of 1024, from the client socket,
+        until a newline character is reached. Bytes of characters that were received,
         but not part of the String being terminated by the newline character
         will be saved in the `self.buffer` for the next receive_line call to read.
 
@@ -73,11 +73,11 @@ class Server:
 
         while len(self.buffer) > 0:
             buffered = self.buffer.pop()
-            if b'\n' in buffered:
-                i = buffered.index(b'\n')
+            if b"\n" in buffered:
+                i = buffered.index(b"\n")
                 chunks.append(buffered[:i])
-                self.buffer.append(buffered[i + 1:])
-                return b''.join(chunks).decode()
+                self.buffer.append(buffered[i + 1 :])
+                return b"".join(chunks).decode()
             chunks.append(buffered)
 
         while True:
@@ -85,11 +85,11 @@ class Server:
             if not chunk:
                 raise Server.ConnectionBrokenException()
 
-            if b'\n' in chunk:
-                i = chunk.index(b'\n')
+            if b"\n" in chunk:
+                i = chunk.index(b"\n")
                 chunks.append(chunk[:i])
-                self.buffer.append(chunk[i + 1:])
-                return b''.join(chunks).decode()
+                self.buffer.append(chunk[i + 1 :])
+                return b"".join(chunks).decode()
             chunks.append(chunk)
 
     def send_line(self, msg: str):
@@ -102,8 +102,8 @@ class Server:
             msg (str): Unencoded string message to send over the socket to the client.
 
         Raises:
-            Server.ConnectionBrokenException: If the connection was terminated before 
-            a full line was sent, which is realised when 0 bytes of the message 
+            Server.ConnectionBrokenException: If the connection was terminated before
+            a full line was sent, which is realised when 0 bytes of the message
             have sent over the socket after a `socket.send` call.
         """
 
@@ -139,7 +139,7 @@ class CompanionConsole:
     def get_socket_input(self) -> list[str]:
         """Receives input via the socket.
 
-        Raises: 
+        Raises:
             Server.ConnectionBrokenException: If the socket connection is broken.
 
         Returns:
@@ -169,7 +169,6 @@ class CompanionConsole:
                 _log.debug("TCP Socket waiting for connection was interupted.")
 
     def stop(self):
-        """Stops the CompanionConsole by disconnecting the socket it is connected to.
-        """
+        """Stops the CompanionConsole by disconnecting the socket it is connected to."""
 
         self.server.disconnect()

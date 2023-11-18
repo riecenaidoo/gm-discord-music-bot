@@ -6,14 +6,12 @@ import utils
 from random import randrange
 
 
-
 _log = logging.getLogger(__name__)
 _log.addHandler(utils.HANDLER)
 _log.setLevel(logging.INFO)
 
 
 class Playlist:
-
     def __init__(self):
         """Creates a structure that can manage the storage and retrieval
         of song urls in a manner that supports the primary music playlist features
@@ -29,7 +27,7 @@ class Playlist:
         self.loop: bool = False
 
     class ExhaustedException(Exception):
-        """Thrown if there are no more songs in the list the Playlist 
+        """Thrown if there are no more songs in the list the Playlist
         is trying to retrieve from.
         """
 
@@ -85,9 +83,8 @@ class Playlist:
         if self.repeat:
             if not self.current_song:
                 self.current_song = self._pop()
-            
+
             return self.current_song
-            
 
         if (len(self.song_queue)) <= 0:
             raise self.ExhaustedException
@@ -114,16 +111,14 @@ class Playlist:
         return self.recently_played_stack.pop(0)
 
     def no_looping_mode(self):
-        """Toggles looping modes off. Songs will not repeat again.
-        """
+        """Toggles looping modes off. Songs will not repeat again."""
 
         self.loop = False
         self.repeat = False
         _log.info(f"Loop/Repeat Mode: OFF")
 
     def shuffle_mode(self):
-        """Toggles shuffle mode. Shuffling pops songs in a random order.
-        """
+        """Toggles shuffle mode. Shuffling pops songs in a random order."""
 
         self.shuffle = not self.shuffle
         _log.info(f"Shuffle Mode: {'ON' if self.shuffle else 'OFF'}")
@@ -138,28 +133,25 @@ class Playlist:
         if self.loop and self.repeat:
             self.repeat = False
             _log.debug(f"Turning off Repeat Mode before enabling Loop Mode.")
-            
+
         _log.info(f"Loop Mode: {'ON' if self.loop else 'OFF'}")
 
     def repeat_mode(self):
-        """Toggles repeat mode. Repeating returns the currently popped song repeatedly.
-        """
+        """Toggles repeat mode. Repeating returns the currently popped song repeatedly."""
 
         self.repeat = not self.repeat
         _log.info(f"Repeat Mode: {'ON' if self.repeat else 'OFF'}")
 
     def clear(self):
-        """Removes all songs from the Playlist.
-        """
+        """Removes all songs from the Playlist."""
 
         self.song_queue.clear()
         self.current_song = None
         self.recently_played_stack.clear()
         _log.info("Cleared playlist.")
-        
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Randomness is hard to automatically test.
     # Run this to manually confirm that shuffling works.
     p = Playlist()

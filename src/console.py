@@ -13,7 +13,7 @@ _log.setLevel(logging.WARNING)
 
 
 class Command:
-    """Wraps a callable function under an alias. 
+    """Wraps a callable function under an alias.
 
     Can be extended from to validate and pass arguments to the callable function.
     """
@@ -43,7 +43,7 @@ class Command:
         """Calls this Command's function. If the function is a coroutine, it will await it.
 
         Args:
-            args (list[str]): Placeholder for arguments to be passed to a callable func. 
+            args (list[str]): Placeholder for arguments to be passed to a callable func.
             Used when call is overriden by inheritors.
         """
         _log.debug("Ignoring unnessary args %s", args)
@@ -60,6 +60,7 @@ class Command:
 
 class StringArgsCommand(Command):
     """Extended Command that passes many string args to its callable function."""
+
     async def call(self, args: list[str]):
         if len(args) < 2:
             raise self.UsageError("Expects atleast one argument")
@@ -72,6 +73,7 @@ class StringArgsCommand(Command):
 
 class IntArgCommand(Command):
     """Extended Command that passes an Integer argument to its callable function."""
+
     async def call(self, args: list[str]):
         if len(args) != 2:
             raise self.UsageError("Expects one argument")
@@ -99,7 +101,7 @@ class Console:
     def add_command(self, command: Command):
         """Adds a Command this Console can support matching against.
 
-        To prevent duplication, this method will not add a Command 
+        To prevent duplication, this method will not add a Command
         if its alias matches an existing Command in this Console.
 
         Args:
@@ -109,7 +111,8 @@ class Console:
         for cmd in self.commands:
             if cmd.match(command.alias):
                 _log.warning(
-                    "Console already has a Command with the alias '%s'.", command.alias)
+                    "Console already has a Command with the alias '%s'.", command.alias
+                )
                 return
         self.commands.append(command)
 
@@ -117,7 +120,7 @@ class Console:
         """Calls the appropriate Command from this Console, if any.
 
         Args:
-            args (list[str]): A list of arguments for the Command, 
+            args (list[str]): A list of arguments for the Command,
             where args[0] is the alias of the Command requested.
         """
 
@@ -138,8 +141,9 @@ class Console:
                 command = await get_input()
                 await self.handle_command(command)
             except Command.UsageError as e:
-                _log.warning("Command %s Usage Error: '%s'.",
-                             command[0].upper(), e.args[0])
+                _log.warning(
+                    "Command %s Usage Error: '%s'.", command[0].upper(), e.args[0]
+                )
 
 
 def __build_console_commands(console: Console, client: MusicClient):
@@ -147,7 +151,7 @@ def __build_console_commands(console: Console, client: MusicClient):
 
     Args:
         console (Console): Console to add Commands to.
-        client (MusicClient): MusicClient this Console should control. 
+        client (MusicClient): MusicClient this Console should control.
     """
     # Voice Channel Controls
     console.add_command(Command("channels", client.get_voice_channels))

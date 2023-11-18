@@ -37,15 +37,19 @@ class MusicClient(discord.Client):
         """Validate the Bot is in a voice channel before invoking the wrapped method."""
         log_message = "%s() requires the Bot to be connected a Voice Channel."
         if iscoroutinefunction(func):
+
             async def validator(self, *args, **kwargs):
                 if self.voice_client is not None:
                     return await func(self, *args, **kwargs)
                 _log.warning(log_message, func.__name__)
+
             return validator
+
         def validator(self, *args, **kwargs):
             if self.voice_client is not None:
                 return func(self, *args, **kwargs)
             _log.warning(log_message, func.__name__)
+
         return validator
 
     def load_voice_channels(self):
@@ -74,7 +78,7 @@ class MusicClient(discord.Client):
 
     # Audio Streaming Logic
     @__requires_voice_connected
-    async def _stream_youtube_url(self, url:str):
+    async def _stream_youtube_url(self, url: str):
         """|coro| Streams a song from YouTube in the connected voice channel.
 
         Will attempt to validate the Bot's state before playing the requested song,
@@ -87,20 +91,26 @@ class MusicClient(discord.Client):
             url (str): YouTube URL of the song to stream.
         """
         async with timeout(10):
-            self.player = await YTDLSource.from_url(url=url, loop=self.voice_client.loop,
-                                                    stream=True)
+            self.player = await YTDLSource.from_url(
+                url=url, loop=self.voice_client.loop, stream=True
+            )
             if self.player:
                 if self.voice_client.is_playing():
-                    _log.error("Audio Player requested to play audio, "
-                               + "while already playing audio.\nLikely a usage error, "
-                               + "or async event-loop failure. Was the Bot shutting down?")
+                    _log.error(
+                        "Audio Player requested to play audio, "
+                        + "while already playing audio.\nLikely a usage error, "
+                        + "or async event-loop failure. Was the Bot shutting down?"
+                    )
                     return
-                _log.info("Now Playing: \"%s\".", self.player.title)
+                _log.info('Now Playing: "%s".', self.player.title)
                 self.player.volume = self.volume
-                self.voice_client.play(self.player,
-                                    after=lambda e: asyncio.run_coroutine_threadsafe(
-                                        self.stream_next(e), self.loop))
-            else:   # Skip to the next song if the AudioSource yielded nothing.
+                self.voice_client.play(
+                    self.player,
+                    after=lambda e: asyncio.run_coroutine_threadsafe(
+                        self.stream_next(e), self.loop
+                    ),
+                )
+            else:  # Skip to the next song if the AudioSource yielded nothing.
                 _log.warning("Skipping Bad URL '%s'.", url)
                 await self.stream_next()
 
@@ -109,7 +119,7 @@ class MusicClient(discord.Client):
         """Callback function of bot#play which is used to play through the
         songs in queue."""
         if error:
-            _log.error('Player error: %s', error)
+            _log.error("Player error: %s", error)
         else:
             try:
                 url = self.playlist.next()
@@ -127,18 +137,24 @@ class MusicClient(discord.Client):
     async def voice_join(self, channel_index: int):
         """Join voice channel by index in server."""
         if self.voice_client is not None:
-            _log.debug("Bot is in a voice channel already,"
-                       + " moving bot to new channel instead of joining.")
+            _log.debug(
+                "Bot is in a voice channel already,"
+                + " moving bot to new channel instead of joining."
+            )
             await self.voice_client.move_to(self.voice_channels[channel_index])
             return
-        if  0 <= channel_index < len(self.voice_channels):
+        if 0 <= channel_index < len(self.voice_channels):
             _log.debug("Joining voice channel.")
             self.voice_client = await discord.VoiceChannel.connect(
-                self.voice_channels[channel_index])
+                self.voice_channels[channel_index]
+            )
             _log.info("Joined '%s'.", self.voice_channels[channel_index])
         else:
-            _log.warning("Invalid channel index '%s'. Current voice channels available: %s.",
-                      channel_index, len(self.voice_channels))
+            _log.warning(
+                "Invalid channel index '%s'. Current voice channels available: %s.",
+                channel_index,
+                len(self.voice_channels),
+            )
 
     @__requires_voice_connected
     async def voice_leave(self):
@@ -191,14 +207,16 @@ class MusicClient(discord.Client):
         volume = float(volume)
         volume /= 100
         if not 0.0 <= volume <= 1.0:
-            _log.warning("Ignoring request to set `bot.volume_level` to '%s' percent.",
-                      int(volume*100))
+            _log.warning(
+                "Ignoring request to set `bot.volume_level` to '%s' percent.",
+                int(volume * 100),
+            )
             return
         if self.player is not None:
             self.player.volume = volume
             _log.debug("Adjusted active player's volume.")
         self.volume = volume
-        _log.info("Volume @ %s%.", int(volume*100))
+        _log.info("Volume @ %s%.", int(volume * 100))
 
     # Song Controls
     @__requires_voice_connected
@@ -206,7 +224,7 @@ class MusicClient(discord.Client):
         """Play the next song in the playlist."""
         if self.voice_client.is_playing():
             _log.info("Skipped current song.")
-            self.voice_client.stop()    # Triggers the callback fn 'stream_next'
+            self.voice_client.stop()  # Triggers the callback fn 'stream_next'
         else:
             _log.info("Playing next song.")
             await self.stream_next()
@@ -215,7 +233,7 @@ class MusicClient(discord.Client):
     async def song_prev(self):
         """Play the previous song in the playlist."""
         try:
-            self.playlist.add(url= self.playlist.prev(), index= 0)
+            self.playlist.add(url=self.playlist.prev(), index=0)
             _log.info("Playing previous song.")
             await self.song_skip()
         except Playlist.ExhaustedException:
