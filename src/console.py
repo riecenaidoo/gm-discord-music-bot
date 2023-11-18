@@ -168,7 +168,7 @@ def __build_console_commands(console: Console, client: MusicClient):
     console.add_command(StringArgsCommand("queue", client.playlist_queue))
     console.add_command(Command("start", client.playlist_start))
     console.add_command(Command("stop", client.playlist_stop))
-    console.add_command(Command("clear", client.playlist.clear))
+    console.add_command(Command("clear", client.playlist.clear_all))
     console.add_command(StringArgsCommand("play", client.playlist_play))
     # Playlist Mode Controls
     console.add_command(Command("shuffle", client.playlist.shuffle_mode))
