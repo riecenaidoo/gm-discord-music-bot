@@ -59,7 +59,7 @@ class Playlist:
         song_url: str = self.song_queue.pop(index)
         if self.loop:
             self.song_queue.append(song_url)
-        if self.current_song != None:
+        if self.current_song is not None:
             self.recently_played_stack.append(self.current_song)
         self.current_song = song_url
         return song_url
@@ -115,7 +115,7 @@ class Playlist:
 
         self.loop = False
         self.repeat = False
-        _log.info(f"Loop/Repeat Mode: OFF")
+        _log.info("Loop/Repeat Mode: OFF")
 
     def shuffle_mode(self):
         """Toggles shuffle mode. Shuffling pops songs in a random order."""
@@ -132,7 +132,7 @@ class Playlist:
 
         if self.loop and self.repeat:
             self.repeat = False
-            _log.debug(f"Turning off Repeat Mode before enabling Loop Mode.")
+            _log.debug("Turning off Repeat Mode before enabling Loop Mode.")
 
         _log.info(f"Loop Mode: {'ON' if self.loop else 'OFF'}")
 

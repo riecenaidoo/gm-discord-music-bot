@@ -52,8 +52,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
                 executor=None,
                 func=lambda: cls.ytdl.extract_info(url, download=not stream),
             )
-        except Exception as e:
-            _log.error(f"URL extraction failed.")
+        except Exception:
+            _log.error("URL extraction failed.")
             # _log.debug(f"URL extraction failed: {e.args[0]}")
             return None  # Catch any download/stream error.
 

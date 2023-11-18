@@ -3,8 +3,9 @@
 .idea
 
 # Build
-__pycache__
 .venv
+__pycache__
+.ruff_cache
 
 # Local
 .env
