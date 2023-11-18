@@ -1,9 +1,9 @@
 """Tools for managing the playlist of the bot."""
 
 import logging
-import utils
-
 from random import randrange
+
+import utils
 
 
 _log = logging.getLogger(__name__)
@@ -12,15 +12,20 @@ _log.setLevel(logging.INFO)
 
 
 class Playlist:
+    """Data structure that manages the storage and retrieval of song urls.
+
+    Support for queuing songs and retrieving them in a queued, shuffled, looped, or repeated
+    fashion. Supports cycling backwards using `prev()` method.
+    """
+
     def __init__(self):
-        """Creates a structure that can manage the storage and retrieval
-        of song urls in a manner that supports the primary music playlist features
-        of queuing, shuffling, looping, and repeating.
+        """Initialises a `song_queue` of urls, a `recently_played_stack` of popped urls, and flags
+        `shuffle`, `loop`, `repeat` to manipulate the retrieval behaviour.
         """
 
-        self.song_queue: list = list()
+        self.song_queue: list = []
         self.current_song = None
-        self.recently_played_stack: list = list()
+        self.recently_played_stack: list = []
 
         self.shuffle: bool = False
         self.repeat: bool = False
@@ -30,8 +35,6 @@ class Playlist:
         """Thrown if there are no more songs in the list the Playlist
         is trying to retrieve from.
         """
-
-        pass
 
     def add(self, url: str, index: int = 0):
         """Add a song url to the playlist's queue.
@@ -121,7 +124,7 @@ class Playlist:
         """Toggles shuffle mode. Shuffling pops songs in a random order."""
 
         self.shuffle = not self.shuffle
-        _log.info(f"Shuffle Mode: {'ON' if self.shuffle else 'OFF'}")
+        _log.info("Shuffle Mode: %s", "ON" if self.shuffle else "OFF")
 
     def loop_mode(self):
         """Toggles loop all mode. Looping will append songs to the queue after they are popped off.
@@ -134,21 +137,29 @@ class Playlist:
             self.repeat = False
             _log.debug("Turning off Repeat Mode before enabling Loop Mode.")
 
-        _log.info(f"Loop Mode: {'ON' if self.loop else 'OFF'}")
+        _log.info("Loop Mode: %s", "ON" if self.loop else "OFF")
 
     def repeat_mode(self):
         """Toggles repeat mode. Repeating returns the currently popped song repeatedly."""
 
         self.repeat = not self.repeat
-        _log.info(f"Repeat Mode: {'ON' if self.repeat else 'OFF'}")
+        _log.info("Repeat Mode: %s", "ON" if self.repeat else "OFF")
 
     def clear(self):
         """Removes all songs from the Playlist."""
 
         self.song_queue.clear()
         self.current_song = None
-        self.recently_played_stack.clear()
         _log.info("Cleared playlist.")
+
+    def clear_all(self):
+        """Removes all songs from the Playlist, including the history
+        of recently retrieved songs."""
+
+        self.song_queue.clear()
+        self.current_song = None
+        self.recently_played_stack.clear()
+        _log.info("Cleared playlist and history.")
 
 
 if __name__ == "__main__":
