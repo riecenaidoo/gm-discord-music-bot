@@ -2,6 +2,7 @@ PYTHON_HOME = python3
 VENV = .venv
 PYTHON = $(VENV)/bin/python3
 PIP = $(VENV)/bin/pip
+RUFF = $(VENV)/bin/ruff
 MAIN = src/main.py
 
 
@@ -32,8 +33,17 @@ help: $(VENV)/bin/activate
 	@echo "---------------------------------------\n"
 
 
+# Check before push.
+.PHONY:check
+check: $(VENV)/bin/activate tools.txt
+	$(PIP) install -r tools.txt
+	$(RUFF) format src/
+	$(RUFF) check src/ --fix
+
+
 .PHONY:clean
 clean:
 	rm -rf src/__pycache__
 	rm -rf src/bot/__pycache__
+	rm -rf .ruff_cache
 	rm -rf $(VENV)
