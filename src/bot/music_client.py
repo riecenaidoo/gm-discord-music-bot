@@ -1,6 +1,7 @@
 """Contains `MusicClient`, an extension of `discord.Client` that manages
 the streaming of music playlists in a Discord server."""
 
+import functools
 import logging
 import time
 import typing
@@ -35,22 +36,17 @@ class MusicClient(discord.Client):
     @staticmethod
     def __requires_voice_connected(func: typing.Callable):
         """Validate the Bot is in a voice channel before invoking the wrapped method."""
-        log_message = "%s() requires the Bot to be connected a Voice Channel."
-        if iscoroutinefunction(func):
 
-            async def validator(self, *args, **kwargs):
-                if self.voice_client is not None:
-                    return await func(self, *args, **kwargs)
-                _log.warning(log_message, func.__name__)
-
-            return validator
-
+        @functools.wraps(func)
         def validator(self, *args, **kwargs):
             if self.voice_client is not None:
                 return func(self, *args, **kwargs)
-            _log.warning(log_message, func.__name__)
+            _log.warning(
+                "%s() requires the Bot to be connected a Voice Channel.", func.__name__
+            )
+            return None
 
-        return validator
+        return utils.to_thread(validator) if iscoroutinefunction(func) else validator
 
     def load_voice_channels(self):
         """Initialise the list of voice channels in server.
@@ -136,25 +132,24 @@ class MusicClient(discord.Client):
 
     async def voice_join(self, channel_index: int):
         """Join voice channel by index in server."""
-        if self.voice_client is not None:
-            _log.debug(
-                "Bot is in a voice channel already,"
-                + " moving bot to new channel instead of joining."
-            )
-            await self.voice_client.move_to(self.voice_channels[channel_index])
-            return
-        if 0 <= channel_index < len(self.voice_channels):
-            _log.debug("Joining voice channel.")
-            self.voice_client = await discord.VoiceChannel.connect(
-                self.voice_channels[channel_index]
-            )
-            _log.info("Joined '%s'.", self.voice_channels[channel_index])
-        else:
+        if not 0 <= channel_index < len(self.voice_channels):
             _log.warning(
                 "Invalid channel index '%s'. Current voice channels available: %s.",
                 channel_index,
                 len(self.voice_channels),
             )
+        elif self.voice_client is not None:
+            _log.debug(
+                "Bot is in a voice channel already,"
+                + " moving bot to new channel instead of joining."
+            )
+            await self.voice_client.move_to(self.voice_channels[channel_index])
+        else:
+            _log.debug("Joining voice channel.")
+            self.voice_client = await discord.VoiceChannel.connect(
+                self.voice_channels[channel_index]
+            )
+            _log.info("Joined '%s'.", self.voice_channels[channel_index])
 
     @__requires_voice_connected
     async def voice_leave(self):
@@ -179,13 +174,13 @@ class MusicClient(discord.Client):
     @__requires_voice_connected
     def playlist_stop(self):
         """Stops the playlist."""
-        self.playlist.clear()
+        self.playlist.clear_all()
         self.voice_client.stop()
         _log.info("Stopped and cleared the playlist.")
 
     async def playlist_play(self, urls: list[str]):
         """Overrides the Playlist with new songs, playing them"""
-        self.playlist.clear()
+        self.playlist.clear_all()
         self.playlist_queue(urls)
         await self.song_skip()
 
@@ -216,7 +211,7 @@ class MusicClient(discord.Client):
             self.player.volume = volume
             _log.debug("Adjusted active player's volume.")
         self.volume = volume
-        _log.info("Volume @ %s%.", int(volume * 100))
+        _log.info("Volume @ %s.", f"{int(volume * 100)}%")
 
     # Song Controls
     @__requires_voice_connected
