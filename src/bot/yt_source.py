@@ -1,10 +1,11 @@
 """youtube_dl logic is handled by this module."""
 
 import asyncio
+import logging
 
 import discord
 import youtube_dl
-import logging
+
 import utils
 
 
@@ -17,6 +18,8 @@ youtube_dl.utils.bug_reports_message = lambda: ""
 
 
 class YTDLSource(discord.PCMVolumeTransformer):
+    """FFMPEG audio source extracted via the YTDL lib."""
+
     ytdl_format_options = {
         "format": "bestaudio/best",
         "outtmpl": "%(extractor)s-%(id)s-%(title)s.%(ext)s",
@@ -46,15 +49,15 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
+        """Return an FFMPEG audio source from the YouTube url."""
         loop = loop or asyncio.get_event_loop()
         try:
             data = await loop.run_in_executor(
                 executor=None,
                 func=lambda: cls.ytdl.extract_info(url, download=not stream),
             )
-        except Exception:
-            _log.error("URL extraction failed.")
-            # _log.debug(f"URL extraction failed: {e.args[0]}")
+        except Exception as e:
+            _log.error("URL extraction failed: '%s'", e.args[0])
             return None  # Catch any download/stream error.
 
         if "entries" in data:
