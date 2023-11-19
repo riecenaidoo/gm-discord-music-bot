@@ -2,9 +2,9 @@ PYTHON_HOME = python3
 VENV = .venv
 PYTHON = $(VENV)/bin/python3
 PIP = $(VENV)/bin/pip
+RUFF = $(VENV)/bin/ruff
+MAIN = src/main.py
 
-
-.PHONY: run help clean
 
 
 $(VENV)/bin/activate: requirements.txt
@@ -12,11 +12,13 @@ $(VENV)/bin/activate: requirements.txt
 	$(PIP) install -r requirements.txt
 
 
+.PHONY: run
 run: ARGS?=
 run: $(VENV)/bin/activate
-	$(PYTHON) main.py $(ARGS)
+	$(PYTHON) $(MAIN) $(ARGS)
 
 
+.PHONY: help
 help: $(VENV)/bin/activate
 	@echo "\n---------------------------------------"
 	@echo "Makefile Help:"
@@ -27,10 +29,22 @@ help: $(VENV)/bin/activate
 	@echo "---------------------------------------"
 	@echo "Script Args:"
 	@echo "---------------------------------------"
-	@$(PYTHON) main.py -h
+	@$(PYTHON) $(MAIN) -h
 	@echo "---------------------------------------\n"
 
 
+$(RUFF): $(VENV)/bin/activate
+	$(PIP) install ruff
+
+
+# Check before push.
+.PHONY:check
+check: $(RUFF)
+	$(RUFF) format src/
+	$(RUFF) check src/ --fix
+
+
+.PHONY:clean
 clean:
-	rm -rf __pycache__
+	rm -rf src/__pycache__ src/bot/__pycache__ .ruff_cache
 	rm -rf $(VENV)
