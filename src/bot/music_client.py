@@ -37,16 +37,25 @@ class MusicClient(discord.Client):
     def __requires_voice_connected(func: typing.Callable):
         """Validate the Bot is in a voice channel before invoking the wrapped method."""
 
+        log_message = "%s() requires the Bot to be connected a Voice Channel."
+
+        @functools.wraps(func)
+        async def validator_async(self, *args, **kwargs):
+            if self.voice_client is not None:
+                return await func(self, *args, **kwargs)
+
+            _log.warning(log_message, func.__name__)
+            return None
+
         @functools.wraps(func)
         def validator(self, *args, **kwargs):
             if self.voice_client is not None:
                 return func(self, *args, **kwargs)
-            _log.warning(
-                "%s() requires the Bot to be connected a Voice Channel.", func.__name__
-            )
+
+            _log.warning(log_message, func.__name__)
             return None
 
-        return utils.to_thread(validator) if iscoroutinefunction(func) else validator
+        return validator_async if iscoroutinefunction(func) else validator
 
     def load_voice_channels(self):
         """Initialise the list of voice channels in server.
