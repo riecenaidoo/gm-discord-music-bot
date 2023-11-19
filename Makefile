@@ -33,17 +33,18 @@ help: $(VENV)/bin/activate
 	@echo "---------------------------------------\n"
 
 
+$(RUFF): $(VENV)/bin/activate
+	$(PIP) install ruff
+
+
 # Check before push.
 .PHONY:check
-check: $(VENV)/bin/activate tools.txt
-	$(PIP) install -r tools.txt
+check: $(RUFF)
 	$(RUFF) format src/
 	$(RUFF) check src/ --fix
 
 
 .PHONY:clean
 clean:
-	rm -rf src/__pycache__
-	rm -rf src/bot/__pycache__
-	rm -rf .ruff_cache
+	rm -rf src/__pycache__ src/bot/__pycache__ .ruff_cache
 	rm -rf $(VENV)
