@@ -1,6 +1,6 @@
 import unittest
 
-from playlist import Playlist
+from bot.playlist import Playlist
 
 
 class TestMusicQueue(unittest.TestCase):

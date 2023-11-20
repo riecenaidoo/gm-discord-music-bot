@@ -1,10 +1,10 @@
-"""Socket logic that enables the Bot to be controlled over WebSocket."""
+"""Socket logic to communicate with a companion app over a TCP Socket."""
 
-import socket
 import logging
+import socket
 
 import utils
-from console import Console, to_thread
+from console import Console
 
 
 _log = logging.getLogger(__name__)
@@ -18,16 +18,17 @@ class Server:
 
     def __init__(self, hostname: str, port: int):
         """Creates a simple single client server over a socket that sends/receives
-    messages in lines (terminated by '/n') of Strings.
+        messages in lines (terminated by '/n') of Strings.
 
-        Args:
-            hostname (str): Hostname of the server socket.
-            port (int): Port to open the server socket on.
+            Args:
+                hostname (str): Hostname of the server socket.
+                port (int): Port to open the server socket on.
         """
 
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(
-            socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)    # Allow reused afterwards
+            socket.SOL_SOCKET, socket.SO_REUSEADDR, 1
+        )  # Allow reused afterwards
         self.server_socket.bind((hostname, port))
         self.server_socket.listen(1)
         self.client_socket, self.address = None, None
@@ -35,11 +36,10 @@ class Server:
 
     class ConnectionBrokenException(Exception):
         """Explicit exception raised when the connection to the client
-        is broken. 
+        is broken.
         """
-        pass
 
-    @to_thread
+    @utils.to_thread
     def connect(self):
         """Awaits a client connection."""
         (self.client_socket, self.address) = self.server_socket.accept()
@@ -54,13 +54,16 @@ class Server:
             self.client_socket.close()
 
     def receive_line(self) -> str:
-        """Receives bytes of information, in chunks of 1024, from the client socket, until a newline character is reached.
+        """Receive the next string terminated by a newline character.
 
-        Bytes of characters that were received, but not part of the String being terminated by the newline character
-        will be saved for the next as part of the next receive_line call.
+        Receives bytes of information, in chunks of 1024, from the client socket,
+        until a newline character is reached. Bytes of characters that were received,
+        but not part of the String being terminated by the newline character
+        will be saved in the `self.buffer` for the next receive_line call to read.
 
         Raises:
-            Server.ConnectionBrokenException: If the connection was terminated before a full line was received.
+            Server.ConnectionBrokenException: If the connection was terminated before a
+            full line was received.
 
         Returns:
             str: Decoded string message  sent from the client.
@@ -70,26 +73,24 @@ class Server:
 
         while len(self.buffer) > 0:
             buffered = self.buffer.pop()
-            if b'\n' in buffered:
-                i = buffered.index(b'\n')
+            if b"\n" in buffered:
+                i = buffered.index(b"\n")
                 chunks.append(buffered[:i])
-                self.buffer.append(buffered[i + 1:])
-                return b''.join(chunks).decode()
-            else:
-                chunks.append(buffered)
+                self.buffer.append(buffered[i + 1 :])
+                return b"".join(chunks).decode()
+            chunks.append(buffered)
 
         while True:
             chunk = self.client_socket.recv(1024)
             if not chunk:
                 raise Server.ConnectionBrokenException()
 
-            if b'\n' in chunk:
-                i = chunk.index(b'\n')
+            if b"\n" in chunk:
+                i = chunk.index(b"\n")
                 chunks.append(chunk[:i])
-                self.buffer.append(chunk[i + 1:])
-                return b''.join(chunks).decode()
-            else:
-                chunks.append(chunk)
+                self.buffer.append(chunk[i + 1 :])
+                return b"".join(chunks).decode()
+            chunks.append(chunk)
 
     def send_line(self, msg: str):
         """Sends a message over the socket to the client.
@@ -101,8 +102,9 @@ class Server:
             msg (str): Unencoded string message to send over the socket to the client.
 
         Raises:
-            Server.ConnectionBrokenException: If the connection was terminated before a full line was sent,
-            which is realised when 0 bytes of the message have sent over the socket after a `socket.send` call.
+            Server.ConnectionBrokenException: If the connection was terminated before
+            a full line was sent, which is realised when 0 bytes of the message
+            have sent over the socket after a `socket.send` call.
         """
 
         if not msg.endswith("\n"):
@@ -117,57 +119,56 @@ class Server:
             total_sent = total_sent + sent
 
 
-class WebSocketConsole:
+class CompanionConsole:
     """Extension of the Console class that can receive commands
-    over a WebSocket.
+    over a Socket.
     """
 
     def __init__(self, console: Console, hostname: str, port: int):
         """Creates an extension of the Console class that receives input
-        for commands via a WebSocket.
+        for commands via a TCP Socket.
 
         Args:
             console (Console): Console to send input to.
             hostname (str): Hostname of the server socket.
             port (int): Port to open the server socket on.
         """
-        self.SERVER = Server(hostname, port)
-        self.CONSOLE = console
+        self.server = Server(hostname, port)
+        self.console = console
 
     def get_socket_input(self) -> list[str]:
         """Receives input via the socket.
 
-        Raises: 
+        Raises:
             Server.ConnectionBrokenException: If the socket connection is broken.
 
         Returns:
             list: A list containing a command and its arguments.
         """
 
-        instruction = self.SERVER.receive_line()
-        self.SERVER.send_line("200/OK")
+        instruction = self.server.receive_line()
+        self.server.send_line("200/OK")
         return instruction.split(" ")
 
     async def start(self):
-        """|coro| Starts the WebSocketConsole. Awaits a connection.
+        """|coro| Starts the CompanionConsole. Awaits a connection.
 
         Once connected, will receive commands over the socket and send them to
         the Console to be executed.
         """
-        while self.CONSOLE.online:
-            _log.debug("WebSocket Open...")
+        while self.console.online:
+            _log.debug("TCP Socket Open...")
             try:
-                await self.SERVER.connect()
-                _log.info("WebSocket Connected!")
+                await self.server.connect()
+                _log.info("Companion Connected!")
                 try:
-                    await self.CONSOLE.start(self.get_socket_input)
+                    await self.console.start(self.get_socket_input)
                 except Server.ConnectionBrokenException:
-                    _log.info("WebSocket Disconnected!")
+                    _log.info("Companion Disconnected!")
             except OSError:
-                _log.debug("Socket waiting for connection was interupted.")
+                _log.debug("TCP Socket waiting for connection was interupted.")
 
     def stop(self):
-        """Stops the WebConsole by disconnecting the socket it is connected to.
-        """
+        """Stops the CompanionConsole by disconnecting the socket it is connected to."""
 
-        self.SERVER.disconnect()
+        self.server.disconnect()

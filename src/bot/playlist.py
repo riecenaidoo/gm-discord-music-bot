@@ -1,10 +1,9 @@
 """Tools for managing the playlist of the bot."""
 
 import logging
-import utils
-
 from random import randrange
 
+import utils
 
 
 _log = logging.getLogger(__name__)
@@ -13,27 +12,29 @@ _log.setLevel(logging.INFO)
 
 
 class Playlist:
+    """Data structure that manages the storage and retrieval of song urls.
+
+    Support for queuing songs and retrieving them in a queued, shuffled, looped, or repeated
+    fashion. Supports cycling backwards using `prev()` method.
+    """
 
     def __init__(self):
-        """Creates a structure that can manage the storage and retrieval
-        of song urls in a manner that supports the primary music playlist features
-        of queuing, shuffling, looping, and repeating.
+        """Initialises a `song_queue` of urls, a `recently_played_stack` of popped urls, and flags
+        `shuffle`, `loop`, `repeat` to manipulate the retrieval behaviour.
         """
 
-        self.song_queue: list = list()
+        self.song_queue: list = []
         self.current_song = None
-        self.recently_played_stack: list = list()
+        self.recently_played_stack: list = []
 
         self.shuffle: bool = False
         self.repeat: bool = False
         self.loop: bool = False
 
     class ExhaustedException(Exception):
-        """Thrown if there are no more songs in the list the Playlist 
+        """Thrown if there are no more songs in the list the Playlist
         is trying to retrieve from.
         """
-
-        pass
 
     def add(self, url: str, index: int = 0):
         """Add a song url to the playlist's queue.
@@ -61,7 +62,7 @@ class Playlist:
         song_url: str = self.song_queue.pop(index)
         if self.loop:
             self.song_queue.append(song_url)
-        if self.current_song != None:
+        if self.current_song is not None:
             self.recently_played_stack.append(self.current_song)
         self.current_song = song_url
         return song_url
@@ -85,9 +86,8 @@ class Playlist:
         if self.repeat:
             if not self.current_song:
                 self.current_song = self._pop()
-            
+
             return self.current_song
-            
 
         if (len(self.song_queue)) <= 0:
             raise self.ExhaustedException
@@ -114,19 +114,17 @@ class Playlist:
         return self.recently_played_stack.pop(0)
 
     def no_looping_mode(self):
-        """Toggles looping modes off. Songs will not repeat again.
-        """
+        """Toggles looping modes off. Songs will not repeat again."""
 
         self.loop = False
         self.repeat = False
-        _log.info(f"Loop/Repeat Mode: OFF")
+        _log.info("Loop/Repeat Mode: OFF")
 
     def shuffle_mode(self):
-        """Toggles shuffle mode. Shuffling pops songs in a random order.
-        """
+        """Toggles shuffle mode. Shuffling pops songs in a random order."""
 
         self.shuffle = not self.shuffle
-        _log.info(f"Shuffle Mode: {'ON' if self.shuffle else 'OFF'}")
+        _log.info("Shuffle Mode: %s", "ON" if self.shuffle else "OFF")
 
     def loop_mode(self):
         """Toggles loop all mode. Looping will append songs to the queue after they are popped off.
@@ -137,29 +135,34 @@ class Playlist:
 
         if self.loop and self.repeat:
             self.repeat = False
-            _log.debug(f"Turning off Repeat Mode before enabling Loop Mode.")
-            
-        _log.info(f"Loop Mode: {'ON' if self.loop else 'OFF'}")
+            _log.debug("Turning off Repeat Mode before enabling Loop Mode.")
+
+        _log.info("Loop Mode: %s", "ON" if self.loop else "OFF")
 
     def repeat_mode(self):
-        """Toggles repeat mode. Repeating returns the currently popped song repeatedly.
-        """
+        """Toggles repeat mode. Repeating returns the currently popped song repeatedly."""
 
         self.repeat = not self.repeat
-        _log.info(f"Repeat Mode: {'ON' if self.repeat else 'OFF'}")
+        _log.info("Repeat Mode: %s", "ON" if self.repeat else "OFF")
 
     def clear(self):
-        """Removes all songs from the Playlist.
-        """
+        """Removes all songs from the Playlist."""
+
+        self.song_queue.clear()
+        self.current_song = None
+        _log.info("Cleared playlist.")
+
+    def clear_all(self):
+        """Removes all songs from the Playlist, including the history
+        of recently retrieved songs."""
 
         self.song_queue.clear()
         self.current_song = None
         self.recently_played_stack.clear()
-        _log.info("Cleared playlist.")
-        
+        _log.info("Cleared playlist and history.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Randomness is hard to automatically test.
     # Run this to manually confirm that shuffling works.
     p = Playlist()
