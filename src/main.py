@@ -6,6 +6,7 @@ import asyncio
 import logging
 import os
 import sys
+import api
 
 import discord
 import dotenv
@@ -41,6 +42,7 @@ def run(token: str, hostname, port: int):
     )
     client = build_client()
     console = build_console(client)
+    API = api.APIHandler(client, "__name__")
     _log.info("Opening TCP Socket @ %s/%s", hostname, port)
     web_console = CompanionConsole(console=console, hostname=hostname, port=port)
 
@@ -65,6 +67,7 @@ def run(token: str, hostname, port: int):
             client.start(token=token, reconnect=True),
             console.start(get_console_input),
             web_console.start(),
+            API.start(HOSTNAME, API_PORT)
         )
 
     try:
@@ -82,6 +85,7 @@ if __name__ == "__main__":
 
     HOSTNAME = "0.0.0.0"  # Defaults
     PORT = 5000
+    API_PORT = 5050
 
     dotenv.load_dotenv()
     bot_token = os.environ.get("DISCORD_BOT_TOKEN", None)
@@ -107,6 +111,12 @@ if __name__ == "__main__":
         "--PORT",
         type=int,
         help=f"Set the PORT to host the WebSocket on. Defaults to '{PORT}'.",
+    )
+    parser.add_argument(
+        "-a",
+        "--API_PORT",
+        type=int,
+        help=f"Set the API PORt to host the API Handler on. Defaults to '{API_PORT}'",
     )
     args = parser.parse_args()
 
