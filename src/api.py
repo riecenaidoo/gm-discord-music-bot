@@ -84,7 +84,6 @@ class APIHandler(Flask):
         return "Resumed"
 
     def set_volume(self, volume_number: int):
-        volume_number = request.args.get("volume_number")
         asyncio.run_coroutine_threadsafe(
             self.client.set_audio_volume(volume_number), self.client.loop
         )
