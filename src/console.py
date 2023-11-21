@@ -144,6 +144,9 @@ class Console:
                 _log.warning(
                     "Command %s Usage Error: '%s'.", command[0].upper(), e.args[0]
                 )
+            except EOFError:
+                _log.warning("No console input detected. Shutting down console.")
+                self.online = False
 
 
 def __build_console_commands(console: Console, client: MusicClient):

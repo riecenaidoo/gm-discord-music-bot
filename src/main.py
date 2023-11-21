@@ -67,7 +67,7 @@ def run(token: str, hostname, port: int):
             client.start(token=token, reconnect=True),
             console.start(get_console_input),
             web_console.start(),
-            API.start(HOSTNAME, API_PORT),
+            # API.start(HOSTNAME, API_PORT),    # Disabled for prealpha
         )
 
     try:
