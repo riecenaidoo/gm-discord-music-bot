@@ -2,16 +2,16 @@ PYTHON_HOME = python3
 VENV = .venv
 PYTHON = $(VENV)/bin/python3
 PIP = $(VENV)/bin/pip
-RUFF = $(VENV)/bin/ruff
 MAIN = src/main.py
 
 
-
+# Setup minimum venv to run the Bot.
 $(VENV)/bin/activate: requirements.txt
 	$(PYTHON_HOME) -m venv $(VENV)
 	$(PIP) install -r requirements.txt
 
 
+# Run the Bot, optionally pass arguments.
 .PHONY: run
 run: ARGS?=
 run: $(VENV)/bin/activate
@@ -19,7 +19,7 @@ run: $(VENV)/bin/activate
 
 
 .PHONY: help
-help: $(VENV)/bin/activate
+help:
 	@echo "\n---------------------------------------"
 	@echo "Makefile Help:"
 	@echo "---------------------------------------"
@@ -29,21 +29,29 @@ help: $(VENV)/bin/activate
 	@echo "---------------------------------------"
 	@echo "Script Args:"
 	@echo "---------------------------------------"
-	@$(PYTHON) $(MAIN) -h
+	@$(MAKE) run ARGS?="-h"
 	@echo "---------------------------------------\n"
 
 
+# Install dev dependencies into the venv.
+.PHONY: dev
+dev: $(VENV)/bin/activate
+	$(PIP) install -r requirements-dev.txt
+
+
+RUFF = $(VENV)/bin/ruff
 $(RUFF): $(VENV)/bin/activate
-	$(PIP) install ruff
+	$(MAKE) dev
 
 
-# Check before push.
+# Linting and static analysis. Done before a push.
 .PHONY:check
 check: $(RUFF)
 	$(RUFF) format src/
 	$(RUFF) check src/ --fix
 
 
+# Remove cache files and venv from the project directory.
 .PHONY:clean
 clean:
 	rm -rf src/__pycache__ src/bot/__pycache__ .ruff_cache

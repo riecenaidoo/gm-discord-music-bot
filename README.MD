@@ -17,3 +17,10 @@ of a socket.
   - FFMPEG is an open-source suite of libraries for handling various types
     of multimedia streaming. - [Read More](https://ffmpeg.org/)
   - `sudo apt install ffmpeg` or `sudo apk add ffmpeg`
+
+
+## Makefile Rules
+
+- `make run`  : Setup the Bot's dependencies in a virtual environment and run it.
+- `make help` : Bot's CLI arg help menu.
+- `make dev`  : Setup dependenices for development and testing in the virtual environment.
