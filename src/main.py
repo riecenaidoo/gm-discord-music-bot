@@ -60,11 +60,19 @@ def run(token: str, hostname, port: int):
     console.add_command(Command("quit", shutdown))
 
     async def runner():
-        """|coro| Starts the coroutines of the Bot and its consoles, submitting
-        them to the event loop."""
+        """|coro| Logs the Bot into Discord then starts coroutine services."""
+
+        try:
+            await client.login(token)
+        except discord.LoginFailure:
+            _log.fatal("Failed to login. Is your token valid?")
+            return
+        except discord.HTTPException as e:
+            _log.fatal("Failed while making a login request to Discord.", e.args[0])
+            return
 
         await asyncio.gather(
-            client.start(token=token, reconnect=True),
+            client.connect(reconnect=True),
             console.start(get_console_input),
             web_console.start(),
             # API.start(HOSTNAME, API_PORT),    # Disabled for prealpha
