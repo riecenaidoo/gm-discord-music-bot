@@ -1,7 +1,7 @@
 FROM alpine:3.18.4
 
 RUN apk add --no-cache \
-	python3 \ 
+	python3 \
 	py3-pip \
 	ffmpeg \
 	git
@@ -10,9 +10,10 @@ RUN apk add --no-cache \
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-WORKDIR discord-music-bot/
+WORKDIR /discord-music-bot
 COPY src/ ./
+
 
 EXPOSE 5000
 
-CMD python main.py
+CMD ["python", "main.py"]
